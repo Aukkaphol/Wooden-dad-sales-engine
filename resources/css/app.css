@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: "Noto Sans Thai", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+    --color-pine-50: #fbf7ef;
+    --color-pine-100: #f3eadb;
+    --color-pine-200: #e4cfad;
+    --color-pine-300: #d1ad78;
+    --color-pine-400: #b8874e;
+    --color-pine-500: #9a6a36;
+    --color-pine-700: #5d4227;
+    --color-ink: #2f2a24;
+}
+
+body {
+    background: #fbf7ef;
+    color: #2f2a24;
+}
