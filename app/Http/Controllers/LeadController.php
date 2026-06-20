@@ -28,8 +28,16 @@ class LeadController extends Controller
 
         $lead = Lead::create([
             ...$validated,
-            'status' => 'New',
-            'lead_status' => 'new',
+            'source' => 'website',
+            'source_platform' => 'website',
+            'source_channel' => 'website_form',
+            'utm_source' => $request->string('utm_source')->toString() ?: null,
+            'utm_medium' => $request->string('utm_medium')->toString() ?: null,
+            'utm_campaign' => $request->string('utm_campaign')->toString() ?: null,
+            'referrer_url' => $request->headers->get('referer'),
+            'status' => 'new_lead',
+            'lead_status' => 'new_lead',
+            'quotation_status' => 'not_started',
         ]);
 
         app(LineNotificationService::class)->notifyNewLead($lead);

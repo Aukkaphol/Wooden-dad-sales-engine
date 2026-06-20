@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'รีวิวลูกค้า | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'รีวิวลูกค้า | '.company()->display_name])
 
 @section('content')
 <section class="bg-pine-50">

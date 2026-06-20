@@ -16,8 +16,8 @@ class AdminLeadController extends Controller
         $filters = $this->validatedFilters($request);
         $query = $this->filteredLeads($filters);
         $totalLeads = Lead::count();
-        $completedLeads = Lead::where('lead_status', 'completed')->count();
-        $allLeads = Lead::all(['budget', 'lead_status']);
+        $wonLeads = Lead::where('status', 'won')->orWhere('lead_status', 'won')->count();
+        $allLeads = Lead::all(['budget', 'status', 'lead_status']);
 
         return view('admin.leads', [
             'leads' => $query->latest()->paginate(15)->withQueryString(),
@@ -29,45 +29,61 @@ class AdminLeadController extends Controller
                 ->orderBy('province')
                 ->pluck('province'),
             'statuses' => Lead::PIPELINE_STATUSES,
-            'statusCounts' => [
-                'new' => Lead::where('lead_status', 'new')->count(),
-                'contacted' => Lead::where('lead_status', 'contacted')->count(),
-                'quoted' => Lead::where('lead_status', 'quoted')->count(),
-                'deposit_paid' => Lead::where('lead_status', 'deposit_paid')->count(),
-                'completed' => $completedLeads,
+            'sources' => [
+                'website' => 'Website',
+                'facebook' => 'Facebook',
+                'line' => 'LINE OA',
+                'manual' => 'Manual',
             ],
+            'statusCounts' => collect(Lead::PIPELINE_STATUSES)
+                ->map(fn (string $label, string $status): int => Lead::where('status', $status)->orWhere('lead_status', $status)->count()),
             'kpis' => [
                 'total_leads' => $totalLeads,
-                'estimated_revenue' => $allLeads->sum(fn (Lead $lead) => $this->estimatedBudgetValue($lead->budget)),
+                'estimated_revenue' => $allLeads->sum(fn (Lead $lead): float => $this->estimatedBudgetValue($lead->budget)),
                 'deposit_revenue' => $allLeads
-                    ->whereIn('lead_status', ['deposit_paid', 'production', 'installation', 'completed'])
-                    ->sum(fn (Lead $lead) => $this->estimatedBudgetValue($lead->budget) * 0.3),
-                'conversion_rate' => $totalLeads > 0 ? round(($completedLeads / $totalLeads) * 100, 1) : 0,
+                    ->filter(fn (Lead $lead): bool => in_array($lead->status ?: $lead->lead_status, ['won'], true))
+                    ->sum(fn (Lead $lead): float => $this->estimatedBudgetValue($lead->budget) * 0.3),
+                'conversion_rate' => $totalLeads > 0 ? round(($wonLeads / $totalLeads) * 100, 1) : 0,
             ],
             'widgets' => [
                 'leads_today' => Lead::whereDate('created_at', today())->count(),
                 'leads_this_month' => Lead::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
                 'pending_follow_up' => Lead::whereNotNull('follow_up_date')
                     ->whereDate('follow_up_date', '<=', today())
-                    ->whereNotIn('lead_status', ['completed', 'lost'])
+                    ->whereNotIn('status', ['won', 'lost'])
                     ->count(),
             ],
-            'kanbanStages' => [
-                'new' => 'ลีดใหม่',
-                'contacted' => 'ติดต่อแล้ว',
-                'quoted' => 'เสนอราคาแล้ว',
-                'deposit_paid' => 'รับมัดจำแล้ว',
-                'completed' => 'ปิดงานแล้ว',
-            ],
+            'kanbanStages' => Lead::PIPELINE_STATUSES,
             'kanbanLeads' => Lead::query()
-                ->whereIn('lead_status', ['new', 'contacted', 'quoted', 'deposit_paid', 'completed'])
+                ->whereIn('status', array_keys(Lead::PIPELINE_STATUSES))
                 ->latest()
                 ->get()
-                ->groupBy('lead_status'),
+                ->groupBy(fn (Lead $lead): string => $lead->status ?: $lead->lead_status ?: 'new_lead'),
             'monthlyLeads' => $this->monthlyLeads(),
             'provinceStats' => $this->provinceStats(),
-            'conversionRate' => $totalLeads > 0 ? round(($completedLeads / $totalLeads) * 100, 1) : 0,
+            'conversionRate' => $totalLeads > 0 ? round(($wonLeads / $totalLeads) * 100, 1) : 0,
         ]);
+    }
+
+    public function websiteLeads(Request $request): View
+    {
+        $request->merge(['source' => 'website']);
+
+        return $this->index($request);
+    }
+
+    public function facebookLeads(Request $request): View
+    {
+        $request->merge(['source' => 'facebook']);
+
+        return $this->index($request);
+    }
+
+    public function lineLeads(Request $request): View
+    {
+        $request->merge(['source' => 'line']);
+
+        return $this->index($request);
     }
 
     public function show(Lead $lead): View
@@ -90,6 +106,7 @@ class AdminLeadController extends Controller
             'admin_notes' => ['nullable', 'string', 'max:5000'],
         ]);
 
+        $validated['status'] = $validated['lead_status'];
         $lead->update($validated);
 
         return back()->with('success', 'บันทึกรายละเอียดลูกค้าเรียบร้อยแล้ว');
@@ -98,11 +115,13 @@ class AdminLeadController extends Controller
     public function updateStatus(Request $request, Lead $lead): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
-            'lead_status' => ['required', 'string', 'in:'.implode(',', array_keys(Lead::PIPELINE_STATUSES))],
+            'lead_status' => ['required_without:status', 'string', 'in:'.implode(',', array_keys(Lead::PIPELINE_STATUSES))],
+            'status' => ['required_without:lead_status', 'string', 'in:'.implode(',', array_keys(Lead::PIPELINE_STATUSES))],
         ]);
 
+        $status = $validated['status'] ?? $validated['lead_status'];
         $oldStatus = $lead->lead_status_label;
-        $lead->update(['lead_status' => $validated['lead_status']]);
+        $lead->update(['status' => $status, 'lead_status' => $status]);
         $newStatus = $lead->fresh()->lead_status_label;
 
         $lead->notes()->create([
@@ -112,7 +131,8 @@ class AdminLeadController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'lead_id' => $lead->id,
-                'lead_status' => $lead->lead_status,
+                'lead_status' => $status,
+                'status' => $status,
                 'lead_status_label' => $newStatus,
                 'message' => 'อัปเดตสถานะงานขายเรียบร้อยแล้ว',
             ]);
@@ -150,6 +170,7 @@ class AdminLeadController extends Controller
             'search' => ['nullable', 'string', 'max:120'],
             'province' => ['nullable', 'string', 'max:120'],
             'lead_status' => ['nullable', 'string', 'in:'.implode(',', array_keys(Lead::PIPELINE_STATUSES))],
+            'source' => ['nullable', 'string', 'in:website,facebook,line,manual'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
         ]);
@@ -165,9 +186,32 @@ class AdminLeadController extends Controller
                 });
             })
             ->when($filters['province'] ?? null, fn (Builder $query, string $province) => $query->where('province', $province))
-            ->when($filters['lead_status'] ?? null, fn (Builder $query, string $status) => $query->where('lead_status', $status))
+            ->when($filters['lead_status'] ?? null, fn (Builder $query, string $status) => $query->where(function (Builder $query) use ($status): void {
+                $query->where('status', $status)->orWhere('lead_status', $status);
+            }))
+            ->when($filters['source'] ?? null, fn (Builder $query, string $source) => $this->applySourceFilter($query, $source))
             ->when($filters['date_from'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '>=', $date))
             ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '<=', $date));
+    }
+
+    private function applySourceFilter(Builder $query, string $source): void
+    {
+        match ($source) {
+            'facebook' => $query->where(function (Builder $query): void {
+                $query->where('source_platform', 'facebook')
+                    ->orWhereIn('source', ['facebook', 'facebook_lead_ads', 'facebook_messenger']);
+            }),
+            'line' => $query->where(function (Builder $query): void {
+                $query->where('source_platform', 'line')
+                    ->orWhereIn('source', ['line', 'line_oa']);
+            }),
+            'website' => $query->where(function (Builder $query): void {
+                $query->where('source_platform', 'website')
+                    ->orWhere('source', 'website')
+                    ->orWhereNull('source');
+            }),
+            default => $query->where('source', $source),
+        };
     }
 
     private function monthlyLeads()
@@ -196,8 +240,8 @@ class AdminLeadController extends Controller
         preg_match_all('/[\d,]+/', (string) $budget, $matches);
 
         $numbers = collect($matches[0])
-            ->map(fn (string $number) => (float) str_replace(',', '', $number))
-            ->filter(fn (float $number) => $number > 0)
+            ->map(fn (string $number): float => (float) str_replace(',', '', $number))
+            ->filter(fn (float $number): bool => $number > 0)
             ->values();
 
         if ($numbers->count() >= 2) {
@@ -212,6 +256,7 @@ class AdminLeadController extends Controller
         $rows = $leads->map(function (Lead $lead): string {
             return '<tr>'.
                 '<td>'.$this->escapeExcel($lead->created_at?->format('Y-m-d H:i')).'</td>'.
+                '<td>'.$this->escapeExcel($lead->source_label).'</td>'.
                 '<td>'.$this->escapeExcel($lead->name).'</td>'.
                 '<td>'.$this->escapeExcel($lead->phone).'</td>'.
                 '<td>'.$this->escapeExcel($lead->province).'</td>'.
@@ -228,7 +273,7 @@ class AdminLeadController extends Controller
 
         return "\xEF\xBB\xBF".'<!doctype html><html><head><meta charset="UTF-8"></head><body><table border="1">'.
             '<thead><tr>'.
-            '<th>วันที่</th><th>ชื่อ</th><th>เบอร์โทร</th><th>จังหวัด</th><th>งบประมาณ</th>'.
+            '<th>วันที่</th><th>แหล่งที่มา</th><th>ชื่อ</th><th>เบอร์โทร</th><th>จังหวัด</th><th>งบประมาณ</th>'.
             '<th>ความกว้างห้อง</th><th>ความยาวห้อง</th><th>สถานะ CRM</th><th>สถานะใบเสนอราคา</th><th>วันติดตาม</th><th>ข้อความ</th><th>โน้ตแอดมิน</th>'.
             '</tr></thead><tbody>'.$rows.'</tbody></table></body></html>';
     }

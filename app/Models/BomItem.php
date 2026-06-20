@@ -13,13 +13,17 @@ class BomItem extends Model
     protected $fillable = [
         'product_id',
         'material_id',
+        'qty_required',
         'quantity',
+        'waste_percent',
     ];
 
     protected function casts(): array
     {
         return [
             'quantity' => 'decimal:3',
+            'qty_required' => 'decimal:3',
+            'waste_percent' => 'decimal:2',
         ];
     }
 
@@ -31,5 +35,10 @@ class BomItem extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function getRequiredQuantityAttribute(): float
+    {
+        return (float) ($this->qty_required ?: $this->quantity);
     }
 }

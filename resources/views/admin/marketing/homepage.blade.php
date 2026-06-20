@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'จัดการหน้าแรก | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'จัดการหน้าแรก | '.company()->display_name])
 
 @php
     $hero = $sections['hero'] ?? null;
@@ -98,7 +98,9 @@
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
             @foreach ([['label' => 'Workflow Section', 'section' => $workflow], ['label' => 'Trust Section', 'section' => $trust], ['label' => 'CTA ท้ายหน้า', 'section' => $finalCta]] as $block)
                 @if ($block['section'])
-                    @php($section = $block['section'])
+                    @php
+                        $section = $block['section'];
+                    @endphp
                     <form method="post" action="{{ route('admin.marketing.homepage.sections.update', $section) }}" class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200">
                         @csrf
                         <h2 class="text-lg font-semibold text-ink">{{ $block['label'] }}</h2>

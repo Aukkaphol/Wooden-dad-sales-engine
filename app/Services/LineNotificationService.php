@@ -16,13 +16,12 @@ class LineNotificationService
 {
     public function notifyNewLead(Lead $lead): void
     {
-        $this->sendToAdmin('lead_created', "🪵 ลูกค้าใหม่จากเว็บไซต์ Wooden Dad Design\n\n"
-            ."👤 ชื่อ: {$lead->name}\n"
-            ."☎️ เบอร์: {$lead->phone}\n"
-            ."📍 จังหวัด: {$lead->province}\n"
-            ."💰 งบประมาณ: {$lead->budget}\n"
-            ."📐 ขนาดห้อง: {$lead->room_width} x {$lead->room_length} ม.\n\n"
-            ."🔎 เปิดดู Lead:\n".$this->adminUrl("/admin/leads/{$lead->id}"), $lead);
+        $this->sendToAdmin('lead_created', "🪵 ลูกค้าใหม่จากเว็บไซต์\n\n"
+            ."ชื่อ: {$lead->name}\n"
+            ."เบอร์: {$lead->phone}\n"
+            ."จังหวัด: {$lead->province}\n"
+            ."งบประมาณ: {$lead->budget}\n\n"
+            ."เปิดดู Lead: ".$this->routeUrl('admin.leads.show', $lead), $lead);
     }
 
     public function notifyFacebookLead(Lead $lead, ?string $email = null): void
@@ -33,7 +32,7 @@ class LineNotificationService
             ."อีเมล: ".($email ?: $lead->email ?: '-')."\n"
             ."จังหวัด: ".($lead->province ?: '-')."\n"
             ."งบประมาณ: ".($lead->budget ?: '-')."\n\n"
-            ."เปิดดู Lead:\n".$this->adminUrl("/admin/leads/{$lead->id}"), $lead);
+            ."เปิดดู Lead:\n".$this->routeUrl('admin.leads.show', $lead), $lead);
     }
 
     public function notifyQuotationCreated(Quotation $quotation): void
@@ -41,11 +40,11 @@ class LineNotificationService
         $quotation->loadMissing('lead');
 
         $this->sendToAdmin('quotation_created', "🧾 สร้างใบเสนอราคาใหม่\n\n"
-            ."เลขที่: {$quotation->quotation_number}\n"
+            ."เลขที่: {$quotation->display_number}\n"
             ."ลูกค้า: {$quotation->lead->name}\n"
-            ."ยอดรวม: ฿".number_format((float) $quotation->subtotal, 2)."\n"
+            ."ยอดรวม: ฿".number_format((float) ($quotation->grand_total ?: $quotation->subtotal), 2)."\n"
             ."สถานะ: {$quotation->status_label}\n\n"
-            ."🔎 เปิดดูใบเสนอราคา:\n".$this->adminUrl("/admin/quotations/{$quotation->id}"), $quotation);
+            ."เปิดดูใบเสนอราคา:\n".$this->routeUrl('admin.quotations.show', $quotation), $quotation);
     }
 
     public function notifyQuotationApproved(Quotation $quotation): void
@@ -53,12 +52,13 @@ class LineNotificationService
         $quotation->loadMissing(['lead', 'productionOrder']);
         $productionOrder = $quotation->productionOrder;
 
-        $this->sendToAdmin('quotation_approved', "✅ ใบเสนอราคาได้รับอนุมัติแล้ว\n\n"
-            ."เลขที่: {$quotation->quotation_number}\n"
-            ."ลูกค้า: {$quotation->lead->name}\n"
-            ."ยอดรวม: ฿".number_format((float) $quotation->subtotal, 2)."\n"
-            ."คิวผลิต: ".($productionOrder?->production_order_number ?? '-')."\n\n"
-            ."🏭 เปิดดูงานผลิต:\n".$this->adminUrl($productionOrder ? "/admin/production/{$productionOrder->id}" : "/admin/quotations/{$quotation->id}"), $quotation);
+        $this->sendToAdmin('quotation_approved', "📋 ลูกค้าอนุมัติใบเสนอราคา\n\n"
+            ."เลขที่:\n{$quotation->display_number}\n\n"
+            ."ลูกค้า:\n{$quotation->lead->name}\n\n"
+            ."ยอดรวม:\n฿".number_format((float) ($quotation->grand_total ?: $quotation->subtotal), 2)."\n\n"
+            ."ระบบสร้างใบสั่งผลิตแล้ว\n"
+            .($productionOrder?->production_order_number ?? '-')."\n\n"
+            ."เปิดดูงานผลิต:\n".($productionOrder ? $this->routeUrl('admin.production.show', $productionOrder) : $this->routeUrl('admin.quotations.show', $quotation)), $quotation);
     }
 
     public function notifyProductionStarted(ProductionOrder $productionOrder): void
@@ -68,8 +68,8 @@ class LineNotificationService
         $this->sendToProduction('production_started', "🏭 เริ่มงานผลิตแล้ว\n\n"
             ."เลข PO: {$productionOrder->production_order_number}\n"
             ."ลูกค้า: {$productionOrder->lead->name}\n"
-            ."สถานะ: {$productionOrder->status_label}\n\n"
-            ."🔎 เปิดดูงาน:\n".$this->adminUrl("/admin/production/{$productionOrder->id}"), $productionOrder);
+            ."สถานะ: {$productionOrder->status_label}\n"
+            ."เปิดดูงาน: ".$this->routeUrl('admin.production.show', $productionOrder), $productionOrder);
     }
 
     public function notifyProductionReady(ProductionOrder $productionOrder): void
@@ -81,7 +81,16 @@ class LineNotificationService
             ."ลูกค้า: {$productionOrder->lead->name}\n"
             ."เบอร์: {$productionOrder->lead->phone}\n"
             ."วันที่นัดส่ง: ".($productionOrder->delivery_date?->format('d/m/Y') ?? '-')."\n\n"
-            ."🔎 เปิดดูงาน:\n".$this->adminUrl("/admin/production/{$productionOrder->id}"), $productionOrder);
+            ."เปิดดูงาน:\n".$this->routeUrl('admin.production.show', $productionOrder), $productionOrder);
+    }
+
+    public function notifyMaterialShortage(ProductionOrder $productionOrder, string $materialName, float $shortageQty, string $unit, string $prNo): void
+    {
+        $this->sendToProduction('material_shortage', "⚠️ วัสดุไม่เพียงพอ\n\n"
+            ."เลข PO:\n{$productionOrder->production_order_number}\n\n"
+            ."วัสดุ:\n{$materialName}\n\n"
+            ."ขาดจำนวน:\n".number_format($shortageQty, 3)." {$unit}\n\n"
+            ."ระบบสร้าง PR แล้ว:\n{$prNo}", $productionOrder);
     }
 
     public function notifyDeliveryScheduled(ProductionOrder $productionOrder): void
@@ -94,7 +103,7 @@ class LineNotificationService
             ."ลูกค้า: {$productionOrder->lead->name}\n"
             ."วันที่: ".($date?->format('d/m/Y') ?? '-')."\n"
             ."ทีมติดตั้ง: {$team}\n\n"
-            ."🗓 เปิดดูตารางนัด:\n".$this->adminUrl('/admin/installation-schedule'), $productionOrder);
+            ."เปิดดูตารางนัด:\n".$this->routeUrl('admin.installation.index'), $productionOrder);
     }
 
     public function notifyInstallationCompleted(ProductionOrder $productionOrder): void
@@ -106,29 +115,41 @@ class LineNotificationService
             ."เลข PO: {$productionOrder->production_order_number}\n"
             ."ลูกค้า: {$productionOrder->lead->name}\n"
             ."ทีมติดตั้ง: {$team}\n\n"
-            ."🔎 เปิดดูงาน:\n".$this->adminUrl("/admin/production/{$productionOrder->id}"), $productionOrder);
+            ."เปิดดูงาน:\n".$this->routeUrl('admin.production.show', $productionOrder), $productionOrder);
     }
 
     private function sendToAdmin(string $event, string $message, ?Model $notifiable = null): void
     {
-        $this->send($event, 'admin', $message, LineSetting::current()->admin_recipient_id, $notifiable);
+        $this->send($event, 'admin', $message, company()->line_staff_recipient ?: LineSetting::current()->admin_recipient_id, $notifiable);
     }
 
     private function sendToProduction(string $event, string $message, ?Model $notifiable = null): void
     {
         $setting = LineSetting::current();
-        $this->send($event, 'production', $message, $setting->production_group_id ?: $setting->admin_recipient_id, $notifiable);
+        $this->send($event, 'production', $message, $setting->production_group_id ?: company()->line_staff_recipient ?: $setting->admin_recipient_id, $notifiable);
     }
 
     private function sendToDelivery(string $event, string $message, ?Model $notifiable = null): void
     {
         $setting = LineSetting::current();
-        $this->send($event, 'delivery', $message, $setting->delivery_group_id ?: $setting->admin_recipient_id, $notifiable);
+        $this->send($event, 'delivery', $message, $setting->delivery_group_id ?: company()->line_staff_recipient ?: $setting->admin_recipient_id, $notifiable);
+    }
+
+    public function sendTestStaffNotification(): void
+    {
+        $company = company();
+
+        $this->sendToAdmin('test_staff_notification', "✅ ทดสอบ LINE OA สำเร็จ\n\n"
+            ."ระบบ: {$company->display_name} ERP\n"
+            ."APP_URL: ".config('app.url')."\n"
+            ."เวลา: ".now()->format('d/m/Y H:i'));
     }
 
     private function send(string $event, string $channel, string $message, ?string $recipient, ?Model $notifiable): void
     {
         $setting = LineSetting::current();
+        $company = company();
+        $accessToken = $setting->channel_access_token ?: $company->line_channel_access_token;
         $baseLog = [
             'event' => $event,
             'channel' => $channel,
@@ -145,7 +166,7 @@ class LineNotificationService
             return;
         }
 
-        if (! $setting->channel_access_token) {
+        if (! $accessToken) {
             $this->recordLog($baseLog + ['status' => 'skipped', 'error_message' => 'ไม่ได้ตั้งค่า Channel Access Token']);
             Log::warning('LINE notification skipped: channel access token is missing.', ['event' => $event, 'channel' => $channel]);
 
@@ -160,7 +181,7 @@ class LineNotificationService
         }
 
         try {
-            $response = Http::withToken($setting->channel_access_token)
+            $response = Http::withToken($accessToken)
                 ->acceptJson()
                 ->post('https://api.line.me/v2/bot/message/push', [
                     'to' => $recipient,
@@ -200,8 +221,11 @@ class LineNotificationService
         }
     }
 
-    private function adminUrl(string $path): string
+    private function routeUrl(string $name, mixed $parameters = []): string
     {
-        return rtrim(config('app.url', config('services.line.admin_base_url', 'http://127.0.0.1:8000')), '/').$path;
+        $baseUrl = rtrim((string) config('app.url'), '/');
+        $path = route($name, $parameters, false);
+
+        return rtrim($baseUrl, '/').$path;
     }
 }

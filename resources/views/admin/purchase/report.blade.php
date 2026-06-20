@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => $title.' | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => $title.' | '.company()->display_name])
 
 @section('content')
 <section class="bg-white">
@@ -12,7 +12,7 @@
         </div>
 
         <section class="overflow-hidden rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200 print:shadow-none print:ring-0">
-            <h2 class="text-xl font-semibold text-ink">Wooden Dad Design</h2>
+            <h2 class="text-xl font-semibold text-ink">{{ company()->display_name }}</h2>
             <p class="mt-1 text-sm text-pine-700">{{ $title }} · {{ now()->format('d/m/Y H:i') }}</p>
             <div class="mt-6 overflow-x-auto">
                 <table class="min-w-full divide-y divide-pine-200 text-sm">

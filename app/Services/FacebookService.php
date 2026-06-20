@@ -13,8 +13,9 @@ class FacebookService
     public function testConnection(?FacebookSetting $setting = null): array
     {
         $setting ??= FacebookSetting::current();
+        $accessToken = $setting->effective_page_access_token ?: company()->facebook_access_token;
 
-        if (! $setting->page_access_token) {
+        if (! $accessToken) {
             return ['ok' => false, 'message' => 'ยังไม่ได้ตั้งค่า Page Access Token'];
         }
 
@@ -47,8 +48,9 @@ class FacebookService
     public function getLeadData(string $leadgenId, ?FacebookSetting $setting = null): ?array
     {
         $setting ??= FacebookSetting::current();
+        $accessToken = $setting->effective_page_access_token ?: company()->facebook_access_token;
 
-        if (! $setting->page_access_token) {
+        if (! $accessToken) {
             Log::warning('Facebook lead fetch skipped: missing page access token.', ['leadgen_id' => $leadgenId]);
 
             return null;
@@ -78,11 +80,12 @@ class FacebookService
     public function sendGraphRequest(string $endpoint, array $query = [], ?FacebookSetting $setting = null): Response
     {
         $setting ??= FacebookSetting::current();
+        $accessToken = $setting->effective_page_access_token ?: company()->facebook_access_token;
 
         return Http::timeout(10)
             ->acceptJson()
             ->get('https://graph.facebook.com/v19.0'.'/'.ltrim($endpoint, '/'), $query + [
-                'access_token' => $setting->page_access_token,
+                'access_token' => $accessToken,
             ]);
     }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'เข้าสู่ระบบแอดมิน | Wooden Dad Design'])
+@extends('layouts.app', ['title' => 'เข้าสู่ระบบแอดมิน | '.company()->display_name])
 
 @section('content')
     <section class="bg-white">

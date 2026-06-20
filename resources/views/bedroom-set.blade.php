@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'ชุดห้องนอน | Wooden Dad Design'])
+@extends('layouts.public', ['title' => 'ชุดห้องนอน | '.company()->display_name])
 
 @section('content')
     <section class="bg-white">

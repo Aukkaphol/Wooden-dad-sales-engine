@@ -3,23 +3,32 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lead extends Model
 {
     use HasFactory;
 
     public const PIPELINE_STATUSES = [
-        'new' => 'ลีดใหม่',
+        'new_lead' => 'ลีดใหม่',
         'contacted' => 'ติดต่อแล้ว',
+        'site_survey' => 'นัดวัดพื้นที่',
         'designing' => 'กำลังออกแบบ',
-        'quoted' => 'ส่งใบเสนอราคาแล้ว',
-        'deposit_paid' => 'รับมัดจำแล้ว',
-        'production' => 'เข้าสู่การผลิต',
-        'installation' => 'รอติดตั้ง',
-        'completed' => 'ปิดงานแล้ว',
-        'lost' => 'ยกเลิก/ไม่สำเร็จ',
+        'quotation_sent' => 'ส่งใบเสนอราคาแล้ว',
+        'negotiation' => 'เจรจาต่อรอง',
+        'won' => 'ปิดการขายสำเร็จ',
+        'lost' => 'ปิดการขายไม่สำเร็จ',
+    ];
+
+    public const SOURCE_LABELS = [
+        'website' => 'Website',
+        'facebook' => 'Facebook',
+        'facebook_lead_ads' => 'Facebook',
+        'facebook_messenger' => 'Facebook',
+        'line' => 'LINE OA',
+        'line_oa' => 'LINE OA',
+        'manual' => 'Manual',
     ];
 
     public const QUOTATION_STATUSES = [
@@ -35,6 +44,8 @@ class Lead extends Model
         'phone',
         'email',
         'source',
+        'source_platform',
+        'source_channel',
         'province',
         'budget',
         'room_type',
@@ -48,12 +59,23 @@ class Lead extends Model
         'quotation_status',
         'follow_up_date',
         'admin_notes',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'campaign_name',
+        'ad_name',
+        'referrer_url',
+        'external_lead_id',
+        'channel_payload',
+        'raw_payload_json',
     ];
 
     protected function casts(): array
     {
         return [
             'follow_up_date' => 'date',
+            'channel_payload' => 'array',
+            'raw_payload_json' => 'array',
         ];
     }
 
@@ -74,7 +96,16 @@ class Lead extends Model
 
     public function getLeadStatusLabelAttribute(): string
     {
-        return self::PIPELINE_STATUSES[$this->lead_status] ?? ucfirst((string) $this->lead_status);
+        $status = $this->status ?: $this->lead_status;
+
+        return self::PIPELINE_STATUSES[$status] ?? ucfirst((string) $status);
+    }
+
+    public function getSourceLabelAttribute(): string
+    {
+        $source = $this->source_platform ?: $this->source ?: 'website';
+
+        return self::SOURCE_LABELS[$source] ?? ucfirst((string) $source);
     }
 
     public function getQuotationStatusLabelAttribute(): string

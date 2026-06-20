@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'รีวิวลูกค้า | Wooden Dad Design'])
+@extends('layouts.public', ['title' => 'รีวิวลูกค้า | '.company()->display_name])
 
 @section('content')
 <section class="bg-[linear-gradient(120deg,#fbf7ef_0%,#ffffff_55%,#f0dfc3_100%)]">
@@ -6,7 +6,7 @@
         <p class="text-sm font-semibold text-pine-500">Customer Reviews</p>
         <div class="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-                <h1 class="text-4xl font-semibold text-ink md:text-5xl">รีวิวจากลูกค้า Wooden Dad Design</h1>
+                <h1 class="text-4xl font-semibold text-ink md:text-5xl">รีวิวจากลูกค้า {{ company()->display_name }}</h1>
                 <p class="mt-4 max-w-2xl leading-8 text-pine-700">เสียงตอบรับจากลูกค้าที่สั่งทำเฟอร์นิเจอร์ไม้สน ทั้งงานห้องนอน ห้องนั่งเล่น ห้องอาหาร และห้องทำงาน</p>
             </div>
             <a href="{{ route('lead.create') }}" class="inline-flex w-fit items-center justify-center rounded-full bg-pine-700 px-6 py-3 text-sm font-semibold text-white hover:bg-pine-500">ขอประเมินราคา</a>

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => $po->po_number.' | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => $po->po_number.' | '.company()->display_name])
 
 @section('content')
 <section class="bg-pine-50">
@@ -33,7 +33,9 @@
                     <h2 class="text-lg font-semibold text-ink">รายการวัตถุดิบ</h2>
                     <div class="mt-5 space-y-4">
                         @foreach ($po->items as $item)
-                            @php($remaining = max(0, (float) $item->quantity - (float) $item->received_quantity))
+                            @php
+                                $remaining = max(0, (float) $item->quantity - (float) $item->received_quantity);
+                            @endphp
                             <div class="rounded-md bg-pine-50 p-4">
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                     <div>

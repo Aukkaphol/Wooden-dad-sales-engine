@@ -13,10 +13,13 @@ class Product extends Model
     protected $fillable = [
         'sku',
         'product_image',
+        'image',
         'name',
         'description',
         'category',
+        'unit',
         'selling_price',
+        'cost_price',
         'material_cost',
         'labor_cost',
         'hardware_cost',
@@ -32,6 +35,7 @@ class Product extends Model
     {
         return [
             'selling_price' => 'decimal:2',
+            'cost_price' => 'decimal:2',
             'material_cost' => 'decimal:2',
             'labor_cost' => 'decimal:2',
             'hardware_cost' => 'decimal:2',

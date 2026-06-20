@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'ประวัติ LINE Notification | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'ประวัติ LINE Notification | '.company()->display_name])
 
 @section('content')
 <section class="bg-pine-50">

@@ -26,8 +26,10 @@ class LineSetting extends Model
 
     public static function current(): self
     {
+        $company = CompanySetting::current();
+
         return self::query()->firstOrCreate([], [
-            'channel_access_token' => config('services.line.channel_access_token'),
+            'channel_access_token' => $company->line_channel_access_token ?: config('services.line.channel_access_token'),
             'admin_recipient_id' => config('services.line.group_id') ?: config('services.line.user_id'),
             'production_group_id' => null,
             'delivery_group_id' => null,

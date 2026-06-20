@@ -14,9 +14,13 @@ class PurchaseRequisition extends Model
     public const STATUSES = [
         'draft' => 'ฉบับร่าง',
         'waiting_approval' => 'รออนุมัติ',
+        'pending' => 'รออนุมัติ',
         'approved' => 'อนุมัติแล้ว',
         'rejected' => 'ไม่อนุมัติ',
         'converted_to_po' => 'แปลงเป็นใบสั่งซื้อแล้ว',
+        'ordered' => 'สั่งซื้อแล้ว',
+        'received' => 'รับเข้าแล้ว',
+        'cancelled' => 'ยกเลิก',
     ];
 
     protected $fillable = [

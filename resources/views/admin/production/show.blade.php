@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => $productionOrder->production_order_number.' | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => $productionOrder->production_order_number.' | '.company()->display_name])
 
 @php
     $statusButtons = [
@@ -34,6 +34,12 @@
             @if (session('success'))
                 <div class="mb-6 rounded-md bg-green-50 p-4 text-sm font-medium text-green-800 ring-1 ring-green-600/20">{{ session('success') }}</div>
             @endif
+            @if (session('warning'))
+                <div class="mb-6 rounded-md bg-amber-50 p-4 text-sm font-medium text-amber-800 ring-1 ring-amber-600/20">{{ session('warning') }}</div>
+            @endif
+            @if ($errors->any())
+                <div class="mb-6 rounded-md bg-rose-50 p-4 text-sm font-medium text-rose-800 ring-1 ring-rose-600/20">{{ $errors->first() }}</div>
+            @endif
 
             @if ($materialShortages->isNotEmpty())
                 <section class="mb-6 rounded-lg bg-rose-50 p-5 ring-1 ring-rose-200">
@@ -55,6 +61,60 @@
                     </div>
                 </section>
             @endif
+
+            <section class="mb-6 rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-ink">วัสดุที่ต้องใช้</h2>
+                        <p class="mt-1 text-sm text-pine-700">คำนวณจาก BOM ของสินค้าในใบสั่งผลิต รวม waste percent</p>
+                    </div>
+                    @if (($materialRequirements ?? collect())->contains(fn ($row) => (float) $row['shortage'] > 0))
+                        <form method="post" action="{{ route('admin.purchase.auto-pr.production', $productionOrder) }}">
+                            @csrf
+                            <button class="rounded-md bg-pine-700 px-4 py-2 text-sm font-semibold text-white hover:bg-pine-500">สร้าง PR</button>
+                        </form>
+                    @endif
+                </div>
+                <div class="mt-5 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-pine-200 text-sm">
+                        <thead class="bg-pine-100 text-pine-700">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-semibold">Material</th>
+                                <th class="px-3 py-2 text-right font-semibold">Required Qty</th>
+                                <th class="px-3 py-2 text-right font-semibold">Current Stock</th>
+                                <th class="px-3 py-2 text-left font-semibold">Status</th>
+                                <th class="px-3 py-2 text-right font-semibold">Shortage</th>
+                                <th class="px-3 py-2 text-right font-semibold">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-pine-100">
+                            @forelse (($materialRequirements ?? collect()) as $row)
+                                <tr>
+                                    <td class="px-3 py-3 font-semibold text-ink">{{ $row['material']->name }}</td>
+                                    <td class="px-3 py-3 text-right text-pine-700">{{ number_format((float) $row['required_qty'], 3) }} {{ $row['material']->unit }}</td>
+                                    <td class="px-3 py-3 text-right text-pine-700">{{ number_format((float) $row['current_stock'], 3) }}</td>
+                                    <td class="px-3 py-3">
+                                        <span class="rounded-full px-3 py-1 text-xs font-semibold {{ (float) $row['shortage'] > 0 ? 'bg-rose-50 text-rose-700' : 'bg-green-50 text-green-700' }}">{{ (float) $row['shortage'] > 0 ? 'ไม่พอ' : 'พร้อมใช้' }}</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-semibold {{ (float) $row['shortage'] > 0 ? 'text-rose-700' : 'text-pine-700' }}">{{ number_format((float) $row['shortage'], 3) }}</td>
+                                    <td class="px-3 py-3 text-right">
+                                        @if ((float) $row['shortage'] > 0)
+                                            <form method="post" action="{{ route('admin.purchase.auto-pr.production', $productionOrder) }}">
+                                                @csrf
+                                                <button class="rounded-md bg-pine-700 px-3 py-2 text-xs font-semibold text-white">สร้าง PR</button>
+                                            </form>
+                                        @else
+                                            <span class="text-xs text-pine-500">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="px-3 py-8 text-center text-pine-700">ยังไม่พบ BOM ที่ตรงกับรายการสินค้า</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
             <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
                 <div class="min-w-0 space-y-6" style="min-width: 0; max-width: 100%;">

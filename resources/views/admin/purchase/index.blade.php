@@ -1,6 +1,8 @@
-@extends('layouts.app', ['title' => 'จัดซื้อ | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'จัดซื้อ | '.company()->display_name])
 
-@php($chartMax = max(1, $purchaseByMonth->max('value') ?? 1))
+@php
+    $chartMax = max(1, $purchaseByMonth->max('value') ?? 1);
+@endphp
 
 @section('content')
 <section class="bg-pine-50">

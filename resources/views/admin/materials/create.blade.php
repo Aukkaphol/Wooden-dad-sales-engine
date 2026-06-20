@@ -1,0 +1,2 @@
+@extends('layouts.admin', ['title' => 'เพิ่มวัสดุ | '.company()->display_name])
+@section('content')<section class="bg-pine-50"><div class="mx-auto max-w-4xl px-4 py-8"><a href="{{ route('admin.materials.index') }}" class="text-sm font-semibold text-pine-700">กลับ</a><h1 class="mt-2 mb-6 text-3xl font-semibold text-ink">เพิ่มวัสดุ</h1>@include('admin.materials._form', ['action' => route('admin.materials.store'), 'method' => 'POST', 'submitLabel' => 'บันทึกวัสดุ'])</div></section>@endsection

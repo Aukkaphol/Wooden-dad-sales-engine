@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => ($supplier->exists ? 'แก้ไขผู้จำหน่าย' : 'เพิ่มผู้จำหน่าย').' | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => ($supplier->exists ? 'แก้ไขผู้จำหน่าย' : 'เพิ่มผู้จำหน่าย').' | '.company()->display_name])
 
 @section('content')
 <section class="bg-pine-50">

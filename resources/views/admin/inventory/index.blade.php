@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'คลังวัสดุและ BOM | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'คลังวัสดุและ BOM | '.company()->display_name])
 
 @section('content')
     <section class="bg-pine-50">

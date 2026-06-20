@@ -11,7 +11,7 @@ class LineNotifyService
 {
     public function sendNewLead(Lead $lead): void
     {
-        $token = config('services.line.channel_access_token');
+        $token = company()->line_channel_access_token ?: config('services.line.channel_access_token');
 
         if (! $token) {
             Log::warning('LINE notification skipped: LINE_CHANNEL_ACCESS_TOKEN is missing.', [
@@ -22,7 +22,7 @@ class LineNotifyService
         }
 
         $message = $this->newLeadMessage($lead);
-        $recipient = config('services.line.group_id') ?: config('services.line.user_id');
+        $recipient = company()->line_staff_recipient ?: config('services.line.group_id') ?: config('services.line.user_id');
 
         try {
             if ($recipient) {
@@ -77,17 +77,15 @@ class LineNotifyService
 
     private function newLeadMessage(Lead $lead): string
     {
-        $detailUrl = rtrim(config('services.line.admin_base_url', 'http://127.0.0.1:8000'), '/')
-            ."/admin/leads/{$lead->id}";
+        $company = company();
+        $detailUrl = rtrim((string) config('app.url'), '/').route('admin.leads.show', $lead, false);
 
-        return "🔥 Lead ใหม่ Wooden Dad Design\n\n"
+        return "🪵 ลูกค้าใหม่จากเว็บไซต์\n\n"
             ."ชื่อ: {$lead->name}\n"
             ."เบอร์: {$lead->phone}\n"
             ."จังหวัด: {$lead->province}\n"
             ."งบประมาณ: {$lead->budget}\n"
-            ."ขนาดห้อง: {$lead->room_width} x {$lead->room_length} ม.\n"
-            ."ข้อความ: ".($lead->message ?: '-')."\n\n"
-            ."ดูรายละเอียด:\n"
+            ."เปิดดู Lead: "
             .$detailUrl;
     }
 }

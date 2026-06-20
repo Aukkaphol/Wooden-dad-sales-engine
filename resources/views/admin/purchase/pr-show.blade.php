@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => $pr->pr_number.' | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => $pr->pr_number.' | '.company()->display_name])
 
 @section('content')
 <section class="bg-pine-50">

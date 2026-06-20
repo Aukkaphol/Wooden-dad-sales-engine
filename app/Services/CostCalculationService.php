@@ -15,7 +15,9 @@ class CostCalculationService
         $product->loadMissing('bomItems.material');
 
         $materialCost = $product->bomItems->sum(
-            fn ($bomItem): float => (float) $bomItem->quantity * (float) $bomItem->material->unit_cost
+            fn ($bomItem): float => (float) $bomItem->required_quantity
+                * (1 + ((float) $bomItem->waste_percent / 100))
+                * (float) $bomItem->material->cost_price_value
         );
         $laborCost = (float) $product->labor_cost;
         $hardwareCost = (float) $product->hardware_cost;
@@ -28,6 +30,7 @@ class CostCalculationService
 
         $product->forceFill([
             'material_cost' => round($materialCost, 2),
+            'cost_price' => round($unitProductionCost, 2),
             'total_cost' => round($unitProductionCost, 2),
             'profit_amount' => round($profitAmount, 2),
             'profit_percent' => round($profitPercent, 2),
@@ -51,8 +54,8 @@ class CostCalculationService
 
     public function quotationItemCost(QuotationItem $item): array
     {
-        $product = $this->findProductByName($item->product_name);
-        $sellingPrice = (float) $item->subtotal;
+        $product = $this->findProductByName($item->display_name);
+        $sellingPrice = (float) $item->display_total;
 
         if (! $product) {
             return [
@@ -70,7 +73,7 @@ class CostCalculationService
             ];
         }
 
-        $cost = $this->productCost($product, (float) $item->quantity);
+        $cost = $this->productCost($product, (float) $item->display_quantity);
         $grossProfit = $sellingPrice - $cost['production_cost'];
 
         return [
@@ -87,7 +90,7 @@ class CostCalculationService
         $quotation->loadMissing('items');
 
         $lines = $quotation->items->map(fn (QuotationItem $item): array => $this->quotationItemCost($item));
-        $sellingPrice = $lines->sum('selling_price');
+        $sellingPrice = (float) ($quotation->grand_total ?: $lines->sum('selling_price'));
         $productionCost = $lines->sum('production_cost');
         $grossProfit = $sellingPrice - $productionCost;
 
@@ -149,7 +152,7 @@ class CostCalculationService
                 return [
                     'sku' => $lines->first()['product']->sku,
                     'product_name' => $productName,
-                    'quantity_sold' => round($lines->sum(fn (array $line): float => (float) $line['item']->quantity), 2),
+                    'quantity_sold' => round($lines->sum(fn (array $line): float => (float) $line['item']->display_quantity), 2),
                     'selling_price' => round($sellingPrice, 2),
                     'revenue' => round($sellingPrice, 2),
                     'production_cost' => round($productionCost, 2),

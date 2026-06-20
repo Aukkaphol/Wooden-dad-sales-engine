@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\ProductionOrder;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequisition;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -27,38 +28,75 @@ class PurchaseService
         return $this->nextNumber(PurchaseOrder::class, 'po_number', 'PO-SUP');
     }
 
+    public function nextPurchaseRequestNumber(): string
+    {
+        return $this->nextNumber(PurchaseRequest::class, 'pr_no', 'PR');
+    }
+
     public function lowStockSuggestions(): Collection
     {
         return Material::query()
             ->orderBy('name')
             ->get()
-            ->filter(fn (Material $material): bool => (float) $material->current_stock < (float) $material->low_stock_level)
+            ->filter(fn (Material $material): bool => (float) $material->current_stock < $material->minimum_stock_value)
             ->map(fn (Material $material): array => [
                 'material' => $material,
                 'current' => (float) $material->current_stock,
-                'minimum' => (float) $material->low_stock_level,
-                'suggested_quantity' => max(0, (float) $material->low_stock_level - (float) $material->current_stock),
+                'minimum' => $material->minimum_stock_value,
+                'suggested_quantity' => max(0, $material->minimum_stock_value - (float) $material->current_stock),
             ])
             ->values();
     }
 
     public function shortageForProduction(ProductionOrder $productionOrder): Collection
     {
-        return collect($this->inventoryService->requiredMaterials($productionOrder))
-            ->map(function (array $requirement): array {
-                $material = $requirement['material'];
-                $available = (float) $material->current_stock - (float) $material->reserved_stock;
-                $required = (float) $requirement['quantity'];
+        return $this->inventoryService->shortagesForProduction($productionOrder)
+            ->map(fn (array $row): array => [
+                'material' => $row['material'],
+                'required' => $row['required_qty'],
+                'available' => $row['current_stock'],
+                'shortage' => $row['shortage'],
+            ]);
+    }
 
-                return [
-                    'material' => $material,
-                    'required' => $required,
-                    'available' => $available,
-                    'shortage' => max(0, $required - $available),
-                ];
-            })
-            ->filter(fn (array $row): bool => $row['shortage'] > 0)
-            ->values();
+    public function createPurchaseRequest(Material $material, float $quantity, string $reason, ?ProductionOrder $productionOrder = null, string $status = 'pending'): PurchaseRequest
+    {
+        return DB::transaction(function () use ($material, $quantity, $reason, $productionOrder, $status): PurchaseRequest {
+            $existing = PurchaseRequest::query()
+                ->where('material_id', $material->id)
+                ->where('production_order_id', $productionOrder?->id)
+                ->whereIn('status', ['draft', 'pending', 'approved'])
+                ->first();
+
+            if ($existing) {
+                if ((float) $existing->requested_qty < $quantity) {
+                    $existing->update(['requested_qty' => $quantity, 'reason' => $reason]);
+                }
+
+                return $existing;
+            }
+
+            return PurchaseRequest::create([
+                'pr_no' => $this->nextPurchaseRequestNumber(),
+                'material_id' => $material->id,
+                'production_order_id' => $productionOrder?->id,
+                'requested_qty' => $quantity,
+                'reason' => $reason,
+                'status' => $status,
+            ]);
+        });
+    }
+
+    public function createPurchaseRequestsForShortages(ProductionOrder $productionOrder, Collection $shortages): Collection
+    {
+        return $shortages->map(function (array $row) use ($productionOrder): PurchaseRequest {
+            return $this->createPurchaseRequest(
+                $row['material'],
+                (float) ($row['shortage'] ?? 0),
+                'วัสดุไม่เพียงพอสำหรับใบสั่งผลิต '.$productionOrder->production_order_number,
+                $productionOrder
+            );
+        });
     }
 
     public function createPrFromProduction(ProductionOrder $productionOrder): ?PurchaseRequisition
@@ -69,13 +107,15 @@ class PurchaseService
             return null;
         }
 
+        $this->createPurchaseRequestsForShortages($productionOrder, $shortages);
+
         return DB::transaction(function () use ($productionOrder, $shortages): PurchaseRequisition {
             $pr = PurchaseRequisition::create([
                 'pr_number' => $this->nextPrNumber(),
                 'request_date' => today(),
                 'requested_by' => 'ฝ่ายผลิต',
-                'reason' => 'สร้างอัตโนมัติจากวัสดุไม่เพียงพอสำหรับ '.$productionOrder->production_order_number,
-                'status' => 'waiting_approval',
+                'reason' => 'วัสดุไม่เพียงพอสำหรับใบสั่งผลิต '.$productionOrder->production_order_number,
+                'status' => 'pending',
                 'production_order_id' => $productionOrder->id,
             ]);
 
@@ -84,7 +124,7 @@ class PurchaseService
                     'material_id' => $row['material']->id,
                     'quantity' => $row['shortage'],
                     'unit' => $row['material']->unit,
-                    'reason' => 'วัตถุดิบไม่เพียงพอสำหรับงานผลิต',
+                    'reason' => 'วัสดุไม่เพียงพอสำหรับงานผลิต',
                 ]);
             }
 
@@ -112,14 +152,29 @@ class PurchaseService
                 'notes' => $notes,
             ]);
 
+            $beforeStock = (float) $item->material->current_stock;
+            $afterStock = $beforeStock + $receivedQuantity;
+
             $item->increment('received_quantity', $receivedQuantity);
-            $item->material->increment('current_stock', $receivedQuantity);
-            $item->material->update(['unit_cost' => $item->unit_cost]);
+            $item->material->update([
+                'current_stock' => $afterStock,
+                'unit_cost' => $item->unit_cost,
+                'cost_price' => $item->unit_cost,
+            ]);
             $item->material->transactions()->create([
                 'type' => 'receive',
                 'quantity' => $receivedQuantity,
                 'unit_cost' => $item->unit_cost,
                 'notes' => 'รับเข้าจาก '.$item->purchaseOrder->po_number,
+            ]);
+            $item->material->movements()->create([
+                'type' => 'receive',
+                'reference_type' => PurchaseOrder::class,
+                'reference_id' => $item->purchase_order_id,
+                'qty' => $receivedQuantity,
+                'before_stock' => $beforeStock,
+                'after_stock' => $afterStock,
+                'remark' => 'รับเข้าจาก '.$item->purchaseOrder->po_number,
             ]);
 
             $purchaseOrder = $item->purchaseOrder->fresh('items');

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'ผลงาน | Wooden Dad Design'])
+@extends('layouts.public', ['title' => 'ผลงาน | '.company()->display_name])
 
 @section('content')
 <section class="bg-[linear-gradient(120deg,#fbf7ef_0%,#ffffff_55%,#f0dfc3_100%)]">
@@ -7,7 +7,7 @@
         <div class="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
                 <h1 class="text-4xl font-semibold text-ink md:text-5xl">ผลงานเฟอร์นิเจอร์ไม้สนสั่งทำ</h1>
-                <p class="mt-4 max-w-2xl leading-8 text-pine-700">รวมตัวอย่างงานจริงจาก Wooden Dad Design ทั้งห้องนอน ห้องนั่งเล่น ห้องอาหาร และห้องทำงาน</p>
+                <p class="mt-4 max-w-2xl leading-8 text-pine-700">รวมตัวอย่างงานจริงจาก {{ company()->display_name }} ทั้งห้องนอน ห้องนั่งเล่น ห้องอาหาร และห้องทำงาน</p>
             </div>
             <a href="{{ route('lead.create') }}" class="inline-flex w-fit items-center justify-center rounded-full bg-pine-700 px-6 py-3 text-sm font-semibold text-white hover:bg-pine-500">ขอประเมินราคา</a>
         </div>
@@ -65,7 +65,7 @@
         document.querySelectorAll('[data-gallery-open]').forEach((button) => {
             button.addEventListener('click', () => {
                 image.src = button.dataset.galleryOpen;
-                image.alt = button.dataset.galleryTitle || 'ผลงาน Wooden Dad Design';
+                image.alt = button.dataset.galleryTitle || 'ผลงาน {{ company()->display_name }}';
                 title.textContent = button.dataset.galleryTitle || 'ผลงาน';
                 dialog.showModal();
             });

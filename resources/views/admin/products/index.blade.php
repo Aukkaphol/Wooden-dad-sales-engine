@@ -1,122 +1,53 @@
-@extends('layouts.app', ['title' => 'แคตตาล็อกสินค้า | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'สินค้า | '.company()->display_name])
 
 @section('content')
     <section class="bg-pine-50">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-pine-500">แคตตาล็อกสินค้า</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-ink">สินค้า ต้นทุน และกำไรขั้นต้น</h1>
-                    <p class="mt-2 max-w-3xl text-sm text-pine-700">รวม SKU รูปสินค้า หมวดหมู่ ราคาขาย ต้นทุน BOM และกำไรของสินค้าเฟอร์นิเจอร์ไม้สน</p>
+                    <p class="text-sm font-semibold text-pine-500">Product Catalog</p>
+                    <h1 class="mt-2 text-3xl font-semibold text-ink">สินค้า</h1>
                 </div>
-                <a href="{{ route('admin.dashboard') }}" class="inline-flex w-fit rounded-md bg-white px-4 py-2 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-100">กลับแดชบอร์ด</a>
+                <a href="{{ route('admin.products.create') }}" class="w-fit rounded-xl bg-pine-700 px-5 py-3 text-sm font-semibold text-white">เพิ่มสินค้า</a>
             </div>
-
-            <div class="grid gap-4 lg:hidden">
-                @forelse ($productCosts as $cost)
-                    @php($product = $cost['product'])
-                    <article class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-pine-200">
-                        <div class="flex gap-4">
-                            <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-pine-100 text-sm font-semibold text-pine-700">
-                                @if ($product->product_image)
-                                    <img src="{{ asset('storage/'.$product->product_image) }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
-                                @else
-                                    รูปสินค้า
-                                @endif
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <p class="text-xs font-semibold text-pine-500">{{ $product->sku ?? '-' }}</p>
-                                    <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-600' }}">{{ $product->is_active ? 'เปิดขาย' : 'พักขาย' }}</span>
-                                </div>
-                                <h2 class="mt-1 text-lg font-semibold text-ink">{{ $product->name }}</h2>
-                                <p class="mt-1 text-sm text-pine-700">{{ $product->category ?: 'ไม่ระบุหมวดหมู่' }}</p>
-                            </div>
-                        </div>
-
-                        <dl class="mt-5 grid gap-3 text-sm">
-                            <div class="flex justify-between gap-3"><dt class="text-pine-700">ราคาขาย</dt><dd class="font-semibold text-ink">฿{{ number_format((float) $product->selling_price, 2) }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-pine-700">ต้นทุนวัสดุจาก BOM</dt><dd class="font-semibold text-ink">฿{{ number_format($cost['material_cost'], 2) }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-pine-700">ต้นทุนรวม</dt><dd class="font-semibold text-ink">฿{{ number_format($cost['unit_production_cost'], 2) }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-pine-700">กำไรขั้นต้น</dt><dd class="font-semibold text-emerald-700">฿{{ number_format($cost['profit_amount'], 2) }}</dd></div>
-                            <div class="flex justify-between gap-3"><dt class="text-pine-700">มาร์จิ้น</dt><dd class="font-semibold text-ink">{{ number_format($cost['profit_percent'], 2) }}%</dd></div>
-                        </dl>
-
-                        <div class="mt-5 rounded-md bg-pine-50 p-4">
-                            <p class="text-sm font-semibold text-ink">รายการ BOM</p>
-                            <div class="mt-3 space-y-2 text-sm text-pine-700">
-                                @forelse ($product->bomItems as $bomItem)
-                                    <div class="flex justify-between gap-3">
-                                        <span>{{ $bomItem->material->name }}</span>
-                                        <span class="font-semibold">{{ number_format((float) $bomItem->quantity, 3) }} {{ $bomItem->material->unit }}</span>
-                                    </div>
-                                @empty
-                                    <p>ยังไม่มี BOM สำหรับสินค้านี้</p>
-                                @endforelse
-                            </div>
-                        </div>
-                    </article>
-                @empty
-                    <p class="rounded-lg border border-dashed border-pine-300 bg-white p-8 text-center text-sm text-pine-700">ยังไม่มีสินค้าในระบบ</p>
-                @endforelse
-            </div>
-
-            <section class="hidden rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200 lg:block">
-                <table class="min-w-full table-fixed divide-y divide-pine-200 text-sm">
+            @if (session('success'))
+                <div class="mb-6 rounded-xl bg-green-50 p-4 text-sm text-green-800 ring-1 ring-green-200">{{ session('success') }}</div>
+            @endif
+            <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-pine-200">
+                <table class="min-w-full divide-y divide-pine-200 text-sm">
                     <thead class="bg-pine-100 text-pine-700">
                         <tr>
-                            <th class="w-20 px-3 py-2 text-left font-semibold">รูป</th>
-                            <th class="w-28 px-3 py-2 text-left font-semibold">SKU</th>
-                            <th class="px-3 py-2 text-left font-semibold">สินค้า</th>
-                            <th class="w-32 px-3 py-2 text-left font-semibold">หมวดหมู่</th>
-                            <th class="w-28 px-3 py-2 text-right font-semibold">ราคาขาย</th>
-                            <th class="w-28 px-3 py-2 text-right font-semibold">ต้นทุนวัสดุ</th>
-                            <th class="w-28 px-3 py-2 text-right font-semibold">ต้นทุนรวม</th>
-                            <th class="w-28 px-3 py-2 text-right font-semibold">กำไรขั้นต้น</th>
-                            <th class="w-24 px-3 py-2 text-right font-semibold">มาร์จิ้น</th>
-                            <th class="w-24 px-3 py-2 text-center font-semibold">สถานะ</th>
+                            <th class="px-4 py-3 text-left">SKU</th>
+                            <th class="px-4 py-3 text-left">Name</th>
+                            <th class="px-4 py-3 text-left">Category</th>
+                            <th class="px-4 py-3 text-right">Selling Price</th>
+                            <th class="px-4 py-3 text-right">Cost Price</th>
+                            <th class="px-4 py-3 text-left">Status</th>
+                            <th class="px-4 py-3 text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-pine-100">
-                        @forelse ($productCosts as $cost)
-                            @php($product = $cost['product'])
-                            <tr class="align-top">
-                                <td class="px-3 py-3">
-                                    <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md bg-pine-100 text-xs font-semibold text-pine-700">
-                                        @if ($product->product_image)
-                                            <img src="{{ asset('storage/'.$product->product_image) }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
-                                        @else
-                                            รูป
-                                        @endif
+                        @forelse ($products as $product)
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-pine-700">{{ $product->sku ?: '-' }}</td>
+                                <td class="px-4 py-3 font-semibold text-ink">{{ $product->name }}</td>
+                                <td class="px-4 py-3 text-pine-700">{{ $product->category ?: '-' }}</td>
+                                <td class="px-4 py-3 text-right text-pine-700">฿{{ number_format((float) $product->selling_price, 2) }}</td>
+                                <td class="px-4 py-3 text-right text-pine-700">฿{{ number_format((float) ($product->cost_price ?: $product->total_cost), 2) }}</td>
+                                <td class="px-4 py-3"><span class="rounded-full bg-pine-100 px-3 py-1 text-xs font-semibold text-pine-700">{{ $product->is_active ? 'Active' : 'Inactive' }}</span></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="{{ route('admin.products.bom', $product) }}" class="rounded-lg bg-pine-50 px-3 py-2 font-semibold text-pine-700">BOM</a>
+                                        <a href="{{ route('admin.products.edit', $product) }}" class="rounded-lg bg-white px-3 py-2 font-semibold text-pine-700 ring-1 ring-pine-200">Edit</a>
                                     </div>
-                                </td>
-                                <td class="px-3 py-3 font-semibold text-pine-700">{{ $product->sku ?? '-' }}</td>
-                                <td class="px-3 py-3">
-                                    <p class="font-medium text-ink">{{ $product->name }}</p>
-                                    <div class="mt-2 space-y-1 text-xs text-pine-700">
-                                        @forelse ($product->bomItems as $bomItem)
-                                            <p>{{ $bomItem->material->name }}: {{ number_format((float) $bomItem->quantity, 3) }} {{ $bomItem->material->unit }}</p>
-                                        @empty
-                                            <p>ยังไม่มี BOM</p>
-                                        @endforelse
-                                    </div>
-                                </td>
-                                <td class="px-3 py-3 text-pine-700">{{ $product->category ?: '-' }}</td>
-                                <td class="px-3 py-3 text-right text-pine-700">฿{{ number_format((float) $product->selling_price, 2) }}</td>
-                                <td class="px-3 py-3 text-right text-pine-700">฿{{ number_format($cost['material_cost'], 2) }}</td>
-                                <td class="px-3 py-3 text-right font-semibold text-ink">฿{{ number_format($cost['unit_production_cost'], 2) }}</td>
-                                <td class="px-3 py-3 text-right font-semibold text-emerald-700">฿{{ number_format($cost['profit_amount'], 2) }}</td>
-                                <td class="px-3 py-3 text-right font-semibold text-ink">{{ number_format($cost['profit_percent'], 2) }}%</td>
-                                <td class="px-3 py-3 text-center">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-600' }}">{{ $product->is_active ? 'เปิดขาย' : 'พักขาย' }}</span>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="10" class="px-3 py-8 text-center text-pine-700">ยังไม่มีสินค้าในระบบ</td></tr>
+                            <tr><td colspan="7" class="px-4 py-10 text-center text-pine-700">ยังไม่มีสินค้า</td></tr>
                         @endforelse
                     </tbody>
                 </table>
-            </section>
+            </div>
         </div>
     </section>
 @endsection

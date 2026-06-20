@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'ขอราคาและแบบฟรี | Wooden Dad Design'])
+@extends('layouts.public', ['title' => 'ขอราคาและแบบฟรี | '.company()->display_name])
 
 @section('content')
     <section class="bg-white">
@@ -6,7 +6,7 @@
             <div>
                 <p class="text-sm font-semibold text-pine-500">ขอราคาและแบบฟรี</p>
                 <h1 class="mt-3 text-4xl font-semibold">เล่าเรื่องห้องของคุณให้เราฟัง</h1>
-                <p class="mt-4 leading-8 text-pine-700">กรอกข้อมูลเบื้องต้น ทีม Wooden Dad Design จะช่วยประเมินแพ็กเกจ Bedroom Set ที่เหมาะกับพื้นที่ งบประมาณ และสไตล์ที่คุณต้องการ</p>
+                <p class="mt-4 leading-8 text-pine-700">กรอกข้อมูลเบื้องต้น ทีม {{ company()->display_name }} จะช่วยประเมินแพ็กเกจ Bedroom Set ที่เหมาะกับพื้นที่ งบประมาณ และสไตล์ที่คุณต้องการ</p>
             </div>
 
             <form action="{{ route('lead.store') }}" method="post" enctype="multipart/form-data" class="rounded-lg border border-pine-200 bg-pine-50 p-6 shadow-sm">

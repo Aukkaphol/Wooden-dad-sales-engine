@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductionOrder extends Model
 {
@@ -72,6 +73,11 @@ class ProductionOrder extends Model
     public function craftsmen(): BelongsToMany
     {
         return $this->belongsToMany(Craftsman::class)->withTimestamps();
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(ProductionItem::class);
     }
 
     public function getStatusLabelAttribute(): string

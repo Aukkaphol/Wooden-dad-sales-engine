@@ -34,6 +34,7 @@ class AdminProductionController extends Controller
     public function show(ProductionOrder $productionOrder, CostCalculationService $costCalculationService, PurchaseService $purchaseService): View
     {
         $productionOrder->load(['lead', 'quotation.items', 'craftsmen']);
+        $inventoryService = app(InventoryService::class);
 
         return view('admin.production.show', [
             'productionOrder' => $productionOrder,
@@ -41,6 +42,7 @@ class AdminProductionController extends Controller
             'craftsmen' => Craftsman::where('is_active', true)->orderBy('name')->get(),
             'costSummary' => $costCalculationService->productionOrderCost($productionOrder),
             'materialShortages' => $purchaseService->shortageForProduction($productionOrder),
+            'materialRequirements' => $inventoryService->materialRequirements($productionOrder),
         ]);
     }
 
@@ -51,6 +53,39 @@ class AdminProductionController extends Controller
         ]);
 
         $oldStatusKey = $productionOrder->status;
+
+        if ($oldStatusKey === 'waiting' && ! in_array($validated['status'], ['waiting', 'cutting'], true)) {
+            return back()->withErrors(['status' => 'ต้องเริ่มงานผลิตจากสถานะกำลังตัดไม้ก่อน เพื่อให้ระบบตรวจและตัดสต๊อกวัสดุ']);
+        }
+
+        if ($oldStatusKey === 'waiting' && $validated['status'] === 'cutting') {
+            $shortages = $inventoryService->deductForProductionStart($productionOrder);
+
+            if ($shortages->isNotEmpty()) {
+                $purchaseRequests = app(PurchaseService::class)->createPurchaseRequestsForShortages($productionOrder, $shortages);
+                $purchaseRequests->each(function ($purchaseRequest) use ($productionOrder, $lineNotificationService): void {
+                    $lineNotificationService->notifyMaterialShortage(
+                        $productionOrder,
+                        $purchaseRequest->material->name,
+                        (float) $purchaseRequest->requested_qty,
+                        $purchaseRequest->material->unit,
+                        $purchaseRequest->pr_no
+                    );
+                });
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'วัสดุไม่เพียงพอ ระบบสร้าง PR แล้ว',
+                        'shortages' => $shortages->values(),
+                    ], 422);
+                }
+
+                return back()
+                    ->withErrors(['materials' => 'วัสดุไม่เพียงพอ ระบบสร้าง PR อัตโนมัติแล้ว'])
+                    ->with('warning', 'วัสดุไม่เพียงพอ ระบบสร้าง PR อัตโนมัติแล้ว');
+            }
+        }
+
         $oldStatus = $productionOrder->status_label;
         $payload = ['status' => $validated['status']];
 
@@ -64,14 +99,6 @@ class AdminProductionController extends Controller
 
         $productionOrder->update($payload);
         $productionOrder->refresh();
-
-        if ($productionOrder->status !== 'waiting') {
-            $inventoryService->reserveForProduction($productionOrder);
-        }
-
-        if ($productionOrder->status === 'delivered') {
-            $inventoryService->consumeForProduction($productionOrder);
-        }
 
         $newStatus = $productionOrder->fresh()->status_label;
         $productionOrder->lead->notes()->create([

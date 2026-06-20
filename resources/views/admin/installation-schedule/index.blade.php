@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'ตารางส่งมอบและติดตั้ง | Wooden Dad Design'])
+@extends('layouts.admin', ['title' => 'ตารางส่งมอบและติดตั้ง | '.company()->display_name])
 
 @php
     $monthFormatter = fn (string $month): string => \Carbon\Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y');
@@ -39,7 +39,9 @@
 
                             <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 @foreach ($monthOrders as $order)
-                                    @php($statusLabel = $statusLabels[$order->installation_status] ?? 'รอตรวจสอบสถานะ')
+                                    @php
+                                        $statusLabel = $statusLabels[$order->installation_status] ?? 'รอตรวจสอบสถานะ';
+                                    @endphp
                                     <article class="rounded-lg border border-pine-200 bg-pine-50 p-4">
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="min-w-0">

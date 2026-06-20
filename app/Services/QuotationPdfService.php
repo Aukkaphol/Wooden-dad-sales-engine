@@ -9,33 +9,51 @@ class QuotationPdfService
     public function render(Quotation $quotation): string
     {
         $quotation->loadMissing(['lead', 'items']);
+        $company = company();
 
         $lines = [
-            'Wooden Dad Design',
-            'ใบเสนอราคาเฟอร์นิเจอร์ไม้สน',
-            'เลขที่ใบเสนอราคา: '.$quotation->quotation_number,
-            'สถานะ: '.$quotation->status_label,
-            'วันที่: '.$quotation->created_at->format('Y-m-d'),
+            $company->display_name,
+            'Professional Custom Pine Wood Furniture Quotation',
+            'Phone: '.($company->phone ?: '-'),
+            'LINE: '.($company->line_oa_id ?: '-'),
+            'Website: '.$company->website_display,
+            'Address: '.($company->address ?: '-'),
+            'Logo: '.($company->logo ?: '-'),
             '',
-            'ลูกค้า: '.$quotation->lead->name,
-            'เบอร์โทร: '.$quotation->lead->phone,
-            'จังหวัด: '.$quotation->lead->province,
-            'ขนาดห้อง: '.$quotation->lead->room_width.' x '.$quotation->lead->room_length.' เมตร',
+            'Quotation No: '.$quotation->display_number,
+            'Status: '.$quotation->status_label,
+            'Date: '.$quotation->created_at->format('Y-m-d'),
+            'Valid Until: '.($quotation->valid_until?->format('Y-m-d') ?? '-'),
             '',
-            'รายการสินค้า',
+            'Customer: '.($quotation->customer_name ?: $quotation->lead->name),
+            'Phone: '.($quotation->phone ?: $quotation->lead->phone),
+            'Province: '.($quotation->province ?: $quotation->lead->province),
+            'Project: '.($quotation->project_name ?: '-'),
+            '',
+            'Items',
         ];
 
         foreach ($quotation->items as $index => $item) {
-            $lines[] = ($index + 1).'. '.$item->product_name;
-            $lines[] = '   จำนวน: '.$item->quantity.'  ราคาต่อหน่วย: '.number_format((float) $item->unit_price, 2).'  ยอดรวม: '.number_format((float) $item->subtotal, 2);
+            $lines[] = ($index + 1).'. '.$item->display_name;
+            if ($item->description) {
+                $lines[] = '   Description: '.$item->description;
+            }
+            $lines[] = '   Qty: '.number_format($item->display_quantity, 2).' '.$item->unit
+                .' | Unit Price: '.number_format((float) $item->unit_price, 2)
+                .' | Amount: '.number_format($item->display_total, 2);
         }
 
         $lines[] = '';
-        $lines[] = 'ยอดรวมใบเสนอราคา: ฿'.number_format((float) $quotation->subtotal, 2);
+        $lines[] = 'Subtotal: '.number_format((float) $quotation->subtotal, 2);
+        $lines[] = 'Discount: '.number_format((float) $quotation->discount, 2);
+        $lines[] = 'Shipping: '.number_format((float) $quotation->shipping_cost, 2);
+        $lines[] = 'Deposit: '.number_format((float) $quotation->deposit_amount, 2);
+        $lines[] = 'Grand Total: '.number_format((float) ($quotation->grand_total ?: $quotation->subtotal), 2);
+        $lines[] = 'Balance: '.number_format($quotation->balance, 2);
 
-        if ($quotation->notes) {
+        if ($quotation->remark || $quotation->notes) {
             $lines[] = '';
-            $lines[] = 'หมายเหตุ: '.$quotation->notes;
+            $lines[] = 'Remark: '.($quotation->remark ?: $quotation->notes);
         }
 
         $content = "BT\n/F1 18 Tf\n50 790 Td\n".$this->pdfText($lines[0])." Tj\n/F1 10 Tf\n0 -24 Td\n";
