@@ -4,7 +4,7 @@
         <p class="text-sm font-semibold text-pine-500">Customer Reviews</p>
         <div class="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-                <h1 class="text-4xl font-semibold text-ink md:text-5xl">รีวิวจากลูกค้า Wooden Dad Design</h1>
+                <h1 class="text-4xl font-semibold text-ink md:text-5xl">รีวิวจากลูกค้า <?php echo e(company()->display_name); ?></h1>
                 <p class="mt-4 max-w-2xl leading-8 text-pine-700">เสียงตอบรับจากลูกค้าที่สั่งทำเฟอร์นิเจอร์ไม้สน ทั้งงานห้องนอน ห้องนั่งเล่น ห้องอาหาร และห้องทำงาน</p>
             </div>
             <a href="<?php echo e(route('lead.create')); ?>" class="inline-flex w-fit items-center justify-center rounded-full bg-pine-700 px-6 py-3 text-sm font-semibold text-white hover:bg-pine-500">ขอประเมินราคา</a>
@@ -52,4 +52,4 @@
 </section>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => 'รีวิวลูกค้า | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\reviews.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.public', ['title' => 'รีวิวลูกค้า | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\reviews.blade.php ENDPATH**/ ?>

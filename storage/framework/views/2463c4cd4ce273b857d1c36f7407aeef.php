@@ -32,6 +32,12 @@
             <?php if(session('success')): ?>
                 <div class="mb-6 rounded-md bg-green-50 p-4 text-sm font-medium text-green-800 ring-1 ring-green-600/20"><?php echo e(session('success')); ?></div>
             <?php endif; ?>
+            <?php if(session('warning')): ?>
+                <div class="mb-6 rounded-md bg-amber-50 p-4 text-sm font-medium text-amber-800 ring-1 ring-amber-600/20"><?php echo e(session('warning')); ?></div>
+            <?php endif; ?>
+            <?php if($errors->any()): ?>
+                <div class="mb-6 rounded-md bg-rose-50 p-4 text-sm font-medium text-rose-800 ring-1 ring-rose-600/20"><?php echo e($errors->first()); ?></div>
+            <?php endif; ?>
 
             <?php if($materialShortages->isNotEmpty()): ?>
                 <section class="mb-6 rounded-lg bg-rose-50 p-5 ring-1 ring-rose-200">
@@ -54,6 +60,60 @@
                     </div>
                 </section>
             <?php endif; ?>
+
+            <section class="mb-6 rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-ink">วัสดุที่ต้องใช้</h2>
+                        <p class="mt-1 text-sm text-pine-700">คำนวณจาก BOM ของสินค้าในใบสั่งผลิต รวม waste percent</p>
+                    </div>
+                    <?php if(($materialRequirements ?? collect())->contains(fn ($row) => (float) $row['shortage'] > 0)): ?>
+                        <form method="post" action="<?php echo e(route('admin.purchase.auto-pr.production', $productionOrder)); ?>">
+                            <?php echo csrf_field(); ?>
+                            <button class="rounded-md bg-pine-700 px-4 py-2 text-sm font-semibold text-white hover:bg-pine-500">สร้าง PR</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+                <div class="mt-5 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-pine-200 text-sm">
+                        <thead class="bg-pine-100 text-pine-700">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-semibold">Material</th>
+                                <th class="px-3 py-2 text-right font-semibold">Required Qty</th>
+                                <th class="px-3 py-2 text-right font-semibold">Current Stock</th>
+                                <th class="px-3 py-2 text-left font-semibold">Status</th>
+                                <th class="px-3 py-2 text-right font-semibold">Shortage</th>
+                                <th class="px-3 py-2 text-right font-semibold">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-pine-100">
+                            <?php $__empty_1 = true; $__currentLoopData = ($materialRequirements ?? collect()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <tr>
+                                    <td class="px-3 py-3 font-semibold text-ink"><?php echo e($row['material']->name); ?></td>
+                                    <td class="px-3 py-3 text-right text-pine-700"><?php echo e(number_format((float) $row['required_qty'], 3)); ?> <?php echo e($row['material']->unit); ?></td>
+                                    <td class="px-3 py-3 text-right text-pine-700"><?php echo e(number_format((float) $row['current_stock'], 3)); ?></td>
+                                    <td class="px-3 py-3">
+                                        <span class="rounded-full px-3 py-1 text-xs font-semibold <?php echo e((float) $row['shortage'] > 0 ? 'bg-rose-50 text-rose-700' : 'bg-green-50 text-green-700'); ?>"><?php echo e((float) $row['shortage'] > 0 ? 'ไม่พอ' : 'พร้อมใช้'); ?></span>
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-semibold <?php echo e((float) $row['shortage'] > 0 ? 'text-rose-700' : 'text-pine-700'); ?>"><?php echo e(number_format((float) $row['shortage'], 3)); ?></td>
+                                    <td class="px-3 py-3 text-right">
+                                        <?php if((float) $row['shortage'] > 0): ?>
+                                            <form method="post" action="<?php echo e(route('admin.purchase.auto-pr.production', $productionOrder)); ?>">
+                                                <?php echo csrf_field(); ?>
+                                                <button class="rounded-md bg-pine-700 px-3 py-2 text-xs font-semibold text-white">สร้าง PR</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="text-xs text-pine-500">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                <tr><td colspan="6" class="px-3 py-8 text-center text-pine-700">ยังไม่พบ BOM ที่ตรงกับรายการสินค้า</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
             <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
                 <div class="min-w-0 space-y-6" style="min-width: 0; max-width: 100%;">
@@ -281,4 +341,4 @@
     </section>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => $productionOrder->production_order_number.' | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\production\show.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => $productionOrder->production_order_number.' | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\production\show.blade.php ENDPATH**/ ?>

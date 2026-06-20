@@ -31,7 +31,9 @@
                     <h2 class="text-lg font-semibold text-ink">รายการวัตถุดิบ</h2>
                     <div class="mt-5 space-y-4">
                         <?php $__currentLoopData = $po->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <?php ($remaining = max(0, (float) $item->quantity - (float) $item->received_quantity)); ?>
+                            <?php
+                                $remaining = max(0, (float) $item->quantity - (float) $item->received_quantity);
+                            ?>
                             <div class="rounded-md bg-pine-50 p-4">
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
@@ -74,4 +76,4 @@
 </section>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => $po->po_number.' | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\purchase\po-show.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => $po->po_number.' | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\purchase\po-show.blade.php ENDPATH**/ ?>

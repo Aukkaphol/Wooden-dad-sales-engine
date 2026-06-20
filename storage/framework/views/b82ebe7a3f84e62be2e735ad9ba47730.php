@@ -10,7 +10,7 @@
         </div>
 
         <section class="overflow-hidden rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200 print:shadow-none print:ring-0">
-            <h2 class="text-xl font-semibold text-ink">Wooden Dad Design</h2>
+            <h2 class="text-xl font-semibold text-ink"><?php echo e(company()->display_name); ?></h2>
             <p class="mt-1 text-sm text-pine-700"><?php echo e($title); ?> · <?php echo e(now()->format('d/m/Y H:i')); ?></p>
             <div class="mt-6 overflow-x-auto">
                 <table class="min-w-full divide-y divide-pine-200 text-sm">
@@ -29,4 +29,4 @@
 </section>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => $title.' | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\purchase\report.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => $title.' | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\purchase\report.blade.php ENDPATH**/ ?>

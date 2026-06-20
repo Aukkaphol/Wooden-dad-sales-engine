@@ -1,286 +1,251 @@
 <?php
+    $company = company();
     $hero = $sections['hero'] ?? null;
-    $workflow = $sections['workflow'] ?? null;
-    $trust = $sections['trust'] ?? null;
-    $finalCta = $sections['final_cta'] ?? null;
-    $steps = ['เลือกเซ็ต', 'ส่งขนาดพื้นที่', 'ประเมินราคา', 'ออกใบเสนอราคา', 'ผลิต', 'ส่งมอบ/ติดตั้ง'];
+    $heroImage = $hero?->image_path ? asset('storage/'.$hero->image_path) : 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=85';
+    $portfolioFallbacks = collect([
+        ['image' => 'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=900&q=85', 'name' => 'บ้านคุณสมชาย', 'room' => 'ห้องนอน', 'province' => 'กำแพงเพชร'],
+        ['image' => 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=85', 'name' => 'บ้านคุณอร', 'room' => 'ห้องรับแขก', 'province' => 'เชียงใหม่'],
+        ['image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=85', 'name' => 'บ้านคุณกิตติ', 'room' => 'ห้องทำงาน', 'province' => 'นครสวรรค์'],
+    ]);
+    $portfolioItems = ($latestPortfolioImages ?? collect())->take(6);
+    $inspirations = [
+        ['title' => 'บ้านมินิมอล', 'image' => 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=85'],
+        ['title' => 'บ้านญี่ปุ่น', 'image' => 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=85'],
+        ['title' => 'บ้านโมเดิร์น', 'image' => 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=85'],
+        ['title' => 'คาเฟ่ไม้สน', 'image' => 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=85'],
+        ['title' => 'ห้องทำงาน', 'image' => 'https://images.unsplash.com/photo-1600494448850-6013c64ba722?auto=format&fit=crop&w=900&q=85'],
+    ];
+    $reviewFallbacks = collect([
+        ['name' => 'สมชาย', 'province' => 'เชียงใหม่', 'rating' => 5, 'text' => 'งานสวยมาก ส่งตรงเวลา ทีมงานเก็บรายละเอียดดีมาก', 'project' => 'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=900&q=85', 'photo' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80'],
+        ['name' => 'อร', 'province' => 'ลำพูน', 'rating' => 5, 'text' => 'ช่วยออกแบบให้เข้ากับบ้านจริง ใช้งานง่ายและอบอุ่นมาก', 'project' => 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=85', 'photo' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'],
+    ]);
 ?>
 
 <?php $__env->startSection('content'); ?>
-    <?php if(! $hero || $hero->active): ?>
-        <section class="bg-[linear-gradient(120deg,#fbf7ef_0%,#ffffff_52%,#f0dfc3_100%)]">
-            <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-[1.05fr_.95fr] md:py-20">
-                <div>
-                    <p class="mb-4 text-sm font-semibold text-pine-500"><?php echo e($hero?->subtitle ?? 'เฟอร์นิเจอร์ไม้สนสั่งทำ'); ?></p>
-                    <h1 class="max-w-2xl text-4xl font-semibold leading-tight text-ink md:text-6xl"><?php echo e($hero?->title ?? 'Wooden Dad Design'); ?></h1>
-                    <p class="mt-5 max-w-xl text-lg leading-8 text-pine-700"><?php echo e($hero?->description ?? 'เลือกเซ็ตเฟอร์นิเจอร์ที่เข้ากับพื้นที่จริงของบ้านคุณ พร้อมประเมินราคาและออกแบบเบื้องต้นฟรี'); ?></p>
-                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <a href="<?php echo e($hero?->button_url ?: route('lead.create')); ?>" class="inline-flex items-center justify-center rounded-full bg-pine-500 px-6 py-3 font-semibold text-white shadow-sm hover:bg-pine-700"><?php echo e($hero?->button_text ?: 'ขอประเมินราคา'); ?></a>
-                        <a href="#furniture-sets" class="inline-flex items-center justify-center rounded-full border border-pine-300 bg-white px-6 py-3 font-semibold text-pine-700 hover:border-pine-500">ดูหมวดเซ็ตเฟอร์นิเจอร์</a>
-                    </div>
-                </div>
-                <div class="overflow-hidden rounded-lg border border-pine-200 bg-white shadow-sm">
-                    <div class="aspect-[4/3] bg-[linear-gradient(135deg,#d8b47a_0%,#f6ead8_42%,#ffffff_43%,#ffffff_64%,#c99b5f_100%)]">
-                        <?php if($hero?->image_path): ?>
-                            <img src="<?php echo e(asset('storage/'.$hero->image_path)); ?>" alt="<?php echo e($hero?->title ?? 'Wooden Dad Design'); ?>" class="h-full w-full object-cover">
-                        <?php else: ?>
-                            <div class="h-full p-6">
-                                <div class="h-full rounded-md border border-white/70 bg-white/35 p-5">
-                                    <div class="h-24 w-3/5 rounded-sm bg-pine-200"></div>
-                                    <div class="mt-8 grid grid-cols-[1.3fr_.7fr] gap-4">
-                                        <div class="h-36 rounded-sm bg-pine-300/80"></div>
-                                        <div class="space-y-3">
-                                            <div class="h-16 rounded-sm bg-white/75"></div>
-                                            <div class="h-16 rounded-sm bg-pine-100"></div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 h-10 rounded-sm bg-pine-400/55"></div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </section>
-    <?php endif; ?>
+<style>
+.premium-home-hero > img {
+        filter: saturate(1.05) contrast(1.03);
+        transform: scale(1.045);
+    }
 
-    <section id="furniture-sets" class="bg-white">
-        <div class="mx-auto max-w-6xl px-5 py-14">
-            <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-pine-500">Furniture Set Collection</p>
-                    <h2 class="mt-2 text-3xl font-semibold text-ink">หมวดเซ็ตเฟอร์นิเจอร์</h2>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-pine-700">เลือกหมวดที่เหมาะกับพื้นที่ของคุณ แล้วส่งข้อมูลให้ทีมช่วยประเมินราคาและแนวทางผลิต</p>
+    .premium-home-copy h1 + p {
+        margin-top: 2rem;
+    }
+</style>
+
+<div class="bg-[#fffaf3] pb-24 text-ink md:pb-0">
+    <section class="premium-home-hero relative min-h-svh overflow-hidden bg-[#1d1711]">
+        <img src="<?php echo e($heroImage); ?>" alt="เฟอร์นิเจอร์ไม้สนสั่งทำสำหรับบ้านอบอุ่น" class="absolute inset-0 h-full w-full object-cover">
+        <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(18,14,10,.76)_0%,rgba(18,14,10,.44)_42%,rgba(18,14,10,.18)_100%)]"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,14,10,.58)_0%,rgba(18,14,10,.18)_38%,rgba(18,14,10,.76)_100%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_68%_36%,rgba(255,255,255,.12)_0%,rgba(255,255,255,0)_34%)]"></div>
+        <div class="relative mx-auto flex min-h-svh max-w-7xl flex-col justify-end px-5 pb-12 pt-36 sm:px-6 md:pb-20 lg:px-8">
+            <div class="premium-home-copy max-w-[420px] md:max-w-3xl">
+                <div class="mb-4 inline-flex rounded-full border border-white/25 bg-white/16 px-4 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur-md">ออกแบบตามพื้นที่จริง ผลิตตามสั่ง ติดตั้งครบจบ</div>
+                <h1 class="text-[2.18rem] font-semibold leading-[1.12] tracking-normal text-white drop-shadow-[0_8px_28px_rgba(0,0,0,.32)] sm:text-5xl md:text-[3.45rem] lg:text-[3.8rem]">
+                    เฟอร์นิเจอร์ไม้สนสั่งทำ<br>
+                    <span class="text-white/95">สำหรับบ้านที่คุณอยากอยู่ไปอีก 20 ปี</span>
+                </h1>
+                <p class="mt-5 max-w-2xl text-lg font-medium leading-8 text-white/90 md:text-xl md:leading-9">ออกแบบตามพื้นที่จริง ผลิตด้วยไม้สนคุณภาพ พร้อมติดตั้งโดยทีมงานมืออาชีพ</p>
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <a href="<?php echo e(route('lead.create')); ?>" class="inline-flex min-h-13 items-center justify-center rounded-full bg-white px-7 py-3.5 text-base font-semibold text-pine-800 shadow-[0_20px_55px_rgba(0,0,0,.20)] transition hover:bg-pine-50">ขอแบบและประเมินฟรี</a>
+                    <a href="<?php echo e(route('portfolio.index')); ?>" class="inline-flex min-h-13 items-center justify-center rounded-full border border-white/70 bg-white/10 px-7 py-3.5 text-base font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/18">ดูผลงานจริง</a>
+                </div>
+                <div class="mt-8 grid max-w-xl grid-cols-3 gap-3 text-white">
+                    <div class="rounded-2xl border border-white/18 bg-white/12 p-3 backdrop-blur-md">
+                        <p class="text-lg font-semibold">Custom</p>
+                        <p class="mt-1 text-xs leading-5 text-white/78">ผลิตตามพื้นที่</p>
+                    </div>
+                    <div class="rounded-2xl border border-white/18 bg-white/12 p-3 backdrop-blur-md">
+                        <p class="text-lg font-semibold">Pine</p>
+                        <p class="mt-1 text-xs leading-5 text-white/78">ไม้สนโทนอุ่น</p>
+                    </div>
+                    <div class="rounded-2xl border border-white/18 bg-white/12 p-3 backdrop-blur-md">
+                        <p class="text-lg font-semibold">Install</p>
+                        <p class="mt-1 text-xs leading-5 text-white/78">พร้อมติดตั้ง</p>
+                    </div>
                 </div>
             </div>
-            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                <?php $__empty_1 = true; $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <article class="overflow-hidden rounded-lg border border-pine-200 bg-white shadow-sm">
-                        <div class="aspect-[4/3] bg-[linear-gradient(135deg,#d8b47a,#fff7ed,#ffffff)]">
-                            <?php if($category->image_path): ?>
-                                <img src="<?php echo e(asset('storage/'.$category->image_path)); ?>" alt="<?php echo e($category->name); ?>" class="h-full w-full object-cover">
-                            <?php else: ?>
-                                <div class="flex h-full items-center justify-center p-6">
-                                    <div class="h-full w-full rounded-md bg-white/45 p-4">
-                                        <div class="h-1/2 rounded bg-pine-200"></div>
-                                        <div class="mt-4 h-8 rounded bg-pine-300"></div>
-                                        <div class="mt-3 h-8 w-2/3 rounded bg-white/80"></div>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="p-5">
-                            <h3 class="text-xl font-semibold text-ink"><?php echo e($category->name); ?></h3>
-                            <p class="mt-3 min-h-20 leading-7 text-pine-700"><?php echo e($category->short_description); ?></p>
-                            <?php if($category->start_price): ?>
-                                <p class="mt-4 text-sm font-semibold text-pine-700">เริ่มต้น ฿<?php echo e(number_format((float) $category->start_price, 2)); ?></p>
-                            <?php endif; ?>
-                            <a href="<?php echo e(route('lead.create')); ?>" class="mt-5 inline-flex w-full items-center justify-center rounded-md bg-pine-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pine-500">ขอประเมินราคา</a>
+        </div>
+    </section>
+
+    <section class="bg-[#fffaf3] px-5 py-8">
+        <div class="mx-auto grid max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <?php $__currentLoopData = [
+                ['icon' => '📐', 'title' => 'วัดพื้นที่จริง', 'text' => 'เข้าใจขนาดและการใช้งานก่อนผลิต'],
+                ['icon' => '💰', 'title' => 'เสนอราคาชัดเจน', 'text' => 'คุยงบประมาณและขอบเขตงานตรงไปตรงมา'],
+                ['icon' => '🪵', 'title' => 'ผลิตด้วยไม้สนแท้', 'text' => 'โทนอบอุ่น งานสัมผัสจริง ดูแลง่าย'],
+                ['icon' => '🛡', 'title' => 'รับประกันงาน', 'text' => 'ดูแลหลังส่งมอบโดยทีมงานเดียวกัน'],
+            ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $trustItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <article class="rounded-[22px] bg-white p-5 shadow-[0_18px_45px_rgba(93,66,39,.08)] ring-1 ring-pine-100">
+                    <div class="text-3xl"><?php echo e($trustItem['icon']); ?></div>
+                    <h2 class="mt-4 text-lg font-semibold text-ink"><?php echo e($trustItem['title']); ?></h2>
+                    <p class="mt-2 text-sm leading-6 text-pine-700"><?php echo e($trustItem['text']); ?></p>
+                </article>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
+    </section>
+
+    <section class="bg-white px-5 py-12 md:py-18">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-7 flex items-end justify-between gap-4">
+                <div>
+                    <p class="text-sm font-semibold text-pine-500">SHOW THE WORK</p>
+                    <h2 class="mt-2 text-3xl font-semibold text-ink md:text-5xl">ผลงานจริงก่อนตัดสินใจ</h2>
+                </div>
+                <a href="<?php echo e(route('portfolio.index')); ?>" class="hidden rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-700 hover:bg-pine-50 sm:inline-flex">ดูทั้งหมด</a>
+            </div>
+
+            <div class="grid gap-5 lg:grid-cols-3">
+                <?php $__empty_1 = true; $__currentLoopData = $portfolioItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <article class="<?php echo e($index === 0 ? 'lg:col-span-2 lg:row-span-2' : ''); ?> group overflow-hidden rounded-[24px] bg-pine-50 shadow-[0_20px_50px_rgba(93,66,39,.10)]">
+                        <div class="<?php echo e($index === 0 ? 'aspect-[4/5] md:aspect-[16/11]' : 'aspect-[4/5]'); ?> relative">
+                            <img src="<?php echo e(asset('storage/'.$item->image_path)); ?>" alt="<?php echo e($item->title ?: $item->category_name); ?>" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]">
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 text-white">
+                                <h3 class="text-2xl font-semibold"><?php echo e($item->title ?: 'บ้านลูกค้า Wooden Dad'); ?></h3>
+                                <p class="mt-1 text-sm text-white/85"><?php echo e($item->category_name); ?> · งานผลิตตามสั่ง</p>
+                            </div>
                         </div>
                     </article>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <p class="rounded-lg border border-dashed border-pine-300 p-8 text-center text-pine-700 md:col-span-2 xl:col-span-4">ยังไม่มีหมวดเซ็ตเฟอร์นิเจอร์ที่เปิดแสดงผล</p>
+                    <?php $__currentLoopData = $portfolioFallbacks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <article class="<?php echo e($index === 0 ? 'lg:col-span-2 lg:row-span-2' : ''); ?> group overflow-hidden rounded-[24px] bg-pine-50 shadow-[0_20px_50px_rgba(93,66,39,.10)]">
+                            <div class="<?php echo e($index === 0 ? 'aspect-[4/5] md:aspect-[16/11]' : 'aspect-[4/5]'); ?> relative">
+                                <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['name']); ?>" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]">
+                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 text-white">
+                                    <h3 class="text-2xl font-semibold"><?php echo e($item['name']); ?></h3>
+                                    <p class="mt-1 text-sm text-white/85"><?php echo e($item['room']); ?> · <?php echo e($item['province']); ?></p>
+                                </div>
+                            </div>
+                        </article>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <?php if(($latestPortfolioImages ?? collect())->isNotEmpty()): ?>
-        <section class="bg-pine-50">
-            <div class="mx-auto max-w-6xl px-5 py-14">
-                <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-pine-500">Portfolio</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-ink">ผลงานล่าสุด</h2>
-                        <p class="mt-2 max-w-2xl text-sm leading-6 text-pine-700">ตัวอย่างงานเฟอร์นิเจอร์ไม้สนสั่งทำจากพื้นที่จริงของลูกค้า</p>
-                    </div>
-                    <a href="<?php echo e(route('portfolio.index')); ?>" class="inline-flex w-fit items-center justify-center rounded-full border border-pine-300 bg-white px-5 py-2.5 text-sm font-semibold text-pine-700 hover:border-pine-500">ดูผลงานทั้งหมด</a>
-                </div>
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <?php $__currentLoopData = $latestPortfolioImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $portfolioImage): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <button type="button" class="group overflow-hidden rounded-lg bg-white text-left shadow-sm ring-1 ring-pine-200" data-home-gallery-open="<?php echo e(asset('storage/'.$portfolioImage->image_path)); ?>" data-home-gallery-title="<?php echo e($portfolioImage->title ?: $portfolioImage->category_name); ?>">
-                            <img src="<?php echo e(asset('storage/'.$portfolioImage->image_path)); ?>" alt="<?php echo e($portfolioImage->title ?: $portfolioImage->category_name); ?>" class="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.02]">
-                            <span class="block p-4">
-                                <span class="block text-xs font-semibold text-pine-500"><?php echo e($portfolioImage->category_name); ?></span>
-                                <span class="mt-1 block font-semibold text-ink"><?php echo e($portfolioImage->title ?: 'ผลงาน '.$portfolioImage->category_name); ?></span>
-                            </span>
-                        </button>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </div>
+    <section class="bg-[#fffaf3] px-5 py-12">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-7 max-w-2xl">
+                <p class="text-sm font-semibold text-pine-500">ROOM INSPIRATION</p>
+                <h2 class="mt-2 text-3xl font-semibold text-ink md:text-5xl">เลือกอารมณ์ของพื้นที่</h2>
             </div>
-        </section>
-
-        <dialog id="homeGalleryDialog" class="w-[min(920px,92vw)] rounded-lg bg-transparent p-0 backdrop:bg-black/75">
-            <div class="overflow-hidden rounded-lg bg-white shadow-xl">
-                <div class="flex items-center justify-between gap-4 border-b border-pine-100 px-4 py-3">
-                    <p id="homeGalleryDialogTitle" class="font-semibold text-ink">ผลงาน</p>
-                    <button type="button" class="rounded-full bg-pine-50 px-3 py-1.5 text-sm font-semibold text-pine-700 hover:bg-pine-100" data-home-gallery-close>ปิด</button>
-                </div>
-                <img id="homeGalleryDialogImage" src="" alt="" class="max-h-[78vh] w-full bg-pine-50 object-contain">
+            <div class="flex snap-x gap-4 overflow-x-auto pb-3 lg:grid lg:grid-cols-5 lg:overflow-visible">
+                <?php $__currentLoopData = $inspirations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <article class="min-w-[78%] snap-start overflow-hidden rounded-[24px] bg-white shadow-[0_18px_42px_rgba(93,66,39,.08)] sm:min-w-[42%] lg:min-w-0">
+                        <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>" class="aspect-[4/5] w-full object-cover">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold text-ink">🏡 <?php echo e($item['title']); ?></h3>
+                        </div>
+                    </article>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
-        </dialog>
+        </div>
+    </section>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const dialog = document.getElementById('homeGalleryDialog');
-                const image = document.getElementById('homeGalleryDialogImage');
-                const title = document.getElementById('homeGalleryDialogTitle');
-
-                document.querySelectorAll('[data-home-gallery-open]').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        image.src = button.dataset.homeGalleryOpen;
-                        image.alt = button.dataset.homeGalleryTitle || 'ผลงาน Wooden Dad Design';
-                        title.textContent = button.dataset.homeGalleryTitle || 'ผลงาน';
-                        dialog.showModal();
-                    });
-                });
-
-                document.querySelector('[data-home-gallery-close]')?.addEventListener('click', () => dialog.close());
-                dialog?.addEventListener('click', (event) => {
-                    if (event.target === dialog) {
-                        dialog.close();
-                    }
-                });
-            });
-        </script>
-    <?php endif; ?>
-
-    <?php if(($customerReviews ?? collect())->isNotEmpty()): ?>
-        <section class="bg-white">
-            <div class="mx-auto max-w-6xl px-5 py-14">
-                <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-pine-500">Customer Reviews</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-ink">รีวิวลูกค้า</h2>
-                        <p class="mt-2 max-w-2xl text-sm leading-6 text-pine-700">เสียงตอบรับจากลูกค้าที่เลือกงานเฟอร์นิเจอร์ไม้สนสั่งทำกับ Wooden Dad Design</p>
-                    </div>
-                    <a href="<?php echo e(route('reviews.index')); ?>" class="inline-flex w-fit items-center justify-center rounded-full border border-pine-300 bg-white px-5 py-2.5 text-sm font-semibold text-pine-700 hover:border-pine-500">อ่านรีวิวทั้งหมด</a>
+    <section class="bg-white px-5 py-12">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-7 flex items-end justify-between gap-4">
+                <div>
+                    <p class="text-sm font-semibold text-pine-500">CUSTOMER STORIES</p>
+                    <h2 class="mt-2 text-3xl font-semibold text-ink md:text-5xl">รีวิวลูกค้า</h2>
                 </div>
-
-                <div class="overflow-hidden" data-review-carousel>
-                    <div class="flex transition-transform duration-700 ease-out" data-review-track>
-                        <?php $__currentLoopData = $customerReviews; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <article class="min-w-full px-1 md:min-w-[50%] lg:min-w-[33.333%]">
-                                <div class="h-full overflow-hidden rounded-lg bg-pine-50 shadow-sm ring-1 ring-pine-200">
-                                    <?php if($review->image_path): ?>
-                                        <img src="<?php echo e(asset('storage/'.$review->image_path)); ?>" alt="ผลงานของ <?php echo e($review->customer_name); ?>" class="aspect-[4/3] w-full object-cover">
-                                    <?php endif; ?>
-                                    <div class="p-6">
-                                        <p class="text-lg tracking-wide text-amber-500"><?php echo e(str_repeat('★', $review->rating)); ?><span class="text-pine-200"><?php echo e(str_repeat('★', 5 - $review->rating)); ?></span></p>
-                                        <p class="mt-4 min-h-24 text-lg leading-8 text-ink">"<?php echo e($review->review_text); ?>"</p>
-                                        <div class="mt-5 border-t border-pine-200 pt-4">
-                                            <p class="font-semibold text-ink">คุณ<?php echo e($review->customer_name); ?></p>
-                                            <?php if($review->province): ?>
-                                                <p class="mt-1 text-sm text-pine-700">จังหวัด<?php echo e($review->province); ?></p>
-                                            <?php endif; ?>
+                <a href="<?php echo e(route('reviews.index')); ?>" class="hidden rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-700 hover:bg-pine-50 sm:inline-flex">อ่านรีวิว</a>
+            </div>
+            <div class="grid gap-5 md:grid-cols-2">
+                <?php $__empty_1 = true; $__currentLoopData = ($customerReviews ?? collect())->take(2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <article class="overflow-hidden rounded-[24px] bg-[#fffaf3] shadow-[0_18px_42px_rgba(93,66,39,.08)] ring-1 ring-pine-100">
+                        <div class="grid md:grid-cols-[.95fr_1.05fr]">
+                            <div class="relative aspect-[4/3] md:aspect-auto">
+                                <?php if($review->image_path): ?>
+                                    <img src="<?php echo e(asset('storage/'.$review->image_path)); ?>" alt="ผลงานของ <?php echo e($review->customer_name); ?>" class="h-full w-full object-cover">
+                                <?php else: ?>
+                                    <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=900&q=85" alt="ผลงาน <?php echo e(company()->display_name); ?>" class="h-full w-full object-cover">
+                                <?php endif; ?>
+                            </div>
+                            <div class="p-6">
+                                <p class="text-lg text-amber-500"><?php echo e(str_repeat('★', $review->rating)); ?></p>
+                                <p class="mt-4 text-xl leading-8 text-ink">"<?php echo e($review->review_text); ?>"</p>
+                                <div class="mt-6 flex items-center gap-3">
+                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80" alt="คุณ<?php echo e($review->customer_name); ?>" class="h-12 w-12 rounded-full object-cover">
+                                    <div>
+                                        <p class="font-semibold text-ink">คุณ<?php echo e($review->customer_name); ?></p>
+                                        <p class="text-sm text-pine-700"><?php echo e($review->province ? 'จังหวัด'.$review->province : 'ลูกค้า '.$company->display_name); ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <?php $__currentLoopData = $reviewFallbacks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $review): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <article class="overflow-hidden rounded-[24px] bg-[#fffaf3] shadow-[0_18px_42px_rgba(93,66,39,.08)] ring-1 ring-pine-100">
+                            <div class="grid md:grid-cols-[.95fr_1.05fr]">
+                                <img src="<?php echo e($review['project']); ?>" alt="ผลงานของคุณ<?php echo e($review['name']); ?>" class="aspect-[4/3] h-full w-full object-cover">
+                                <div class="p-6">
+                                    <p class="text-lg text-amber-500"><?php echo e(str_repeat('★', $review['rating'])); ?></p>
+                                    <p class="mt-4 text-xl leading-8 text-ink">"<?php echo e($review['text']); ?>"</p>
+                                    <div class="mt-6 flex items-center gap-3">
+                                        <img src="<?php echo e($review['photo']); ?>" alt="คุณ<?php echo e($review['name']); ?>" class="h-12 w-12 rounded-full object-cover">
+                                        <div>
+                                            <p class="font-semibold text-ink">คุณ<?php echo e($review['name']); ?></p>
+                                            <p class="text-sm text-pine-700">จังหวัด<?php echo e($review['province']); ?></p>
                                         </div>
                                     </div>
                                 </div>
-                            </article>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const carousel = document.querySelector('[data-review-carousel]');
-                const track = document.querySelector('[data-review-track]');
-
-                if (!carousel || !track) {
-                    return;
-                }
-
-                const slides = Array.from(track.children);
-                let index = 0;
-
-                const visibleSlides = () => {
-                    if (window.innerWidth >= 1024) {
-                        return 3;
-                    }
-
-                    if (window.innerWidth >= 768) {
-                        return 2;
-                    }
-
-                    return 1;
-                };
-
-                const move = () => {
-                    const maxIndex = Math.max(0, slides.length - visibleSlides());
-                    index = index >= maxIndex ? 0 : index + 1;
-                    track.style.transform = `translateX(-${index * (100 / visibleSlides())}%)`;
-                };
-
-                if (slides.length > 1) {
-                    window.setInterval(move, 3500);
-                    window.addEventListener('resize', () => {
-                        index = 0;
-                        track.style.transform = 'translateX(0)';
-                    });
-                }
-            });
-        </script>
-    <?php endif; ?>
-
-    <?php if($workflow?->active): ?>
-        <section class="bg-pine-50">
-            <div class="mx-auto max-w-6xl px-5 py-14">
-                <div class="max-w-3xl">
-                    <p class="text-sm font-semibold text-pine-500"><?php echo e($workflow->subtitle); ?></p>
-                    <h2 class="mt-2 text-3xl font-semibold text-ink"><?php echo e($workflow->title); ?></h2>
-                    <p class="mt-3 leading-7 text-pine-700"><?php echo e($workflow->description); ?></p>
-                </div>
-                <div class="mt-8 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-                    <?php $__currentLoopData = $steps; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $step): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="rounded-lg bg-white p-5 text-center shadow-sm ring-1 ring-pine-200">
-                            <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-pine-100 text-sm font-semibold text-pine-700"><?php echo e($index + 1); ?></div>
-                            <p class="mt-3 font-semibold text-ink"><?php echo e($step); ?></p>
-                        </div>
+                            </div>
+                        </article>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </div>
+                <?php endif; ?>
             </div>
-        </section>
-    <?php endif; ?>
+        </div>
+    </section>
 
-    <?php if($trust?->active): ?>
-        <section class="bg-white">
-            <div class="mx-auto grid max-w-6xl gap-8 px-5 py-14 md:grid-cols-[.8fr_1.2fr] md:items-center">
-                <div class="aspect-[4/3] rounded-lg bg-[linear-gradient(135deg,#c99b5f,#f6ead8,#ffffff)] p-6 shadow-sm ring-1 ring-pine-200">
-                    <div class="h-full rounded-md bg-white/50 p-5">
-                        <div class="h-14 rounded bg-pine-200"></div>
-                        <div class="mt-5 grid grid-cols-2 gap-4">
-                            <div class="h-32 rounded bg-pine-300"></div>
-                            <div class="h-32 rounded bg-white/80"></div>
-                        </div>
-                        <div class="mt-5 h-10 rounded bg-pine-400/60"></div>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-pine-500"><?php echo e($trust->subtitle); ?></p>
-                    <h2 class="mt-2 text-3xl font-semibold text-ink"><?php echo e($trust->title); ?></h2>
-                    <p class="mt-4 leading-8 text-pine-700"><?php echo e($trust->description); ?></p>
-                    <div class="mt-6 grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-md bg-pine-50 p-4"><p class="font-semibold text-ink">วัดพื้นที่จริง</p></div>
-                        <div class="rounded-md bg-pine-50 p-4"><p class="font-semibold text-ink">เสนอราคาชัดเจน</p></div>
-                        <div class="rounded-md bg-pine-50 p-4"><p class="font-semibold text-ink">ผลิตตามงานสั่งทำ</p></div>
-                    </div>
-                </div>
+    <section class="bg-[#fffaf3] px-5 py-12">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-8 max-w-2xl">
+                <p class="text-sm font-semibold text-pine-500">PROCESS</p>
+                <h2 class="mt-2 text-3xl font-semibold text-ink md:text-5xl">จากพื้นที่จริงสู่งานติดตั้ง</h2>
             </div>
-        </section>
-    <?php endif; ?>
+            <div class="grid gap-4 md:grid-cols-4">
+                <?php $__currentLoopData = [
+                    ['no' => '1', 'title' => 'วัดพื้นที่', 'text' => 'ดูขนาดและข้อจำกัดหน้างาน'],
+                    ['no' => '2', 'title' => 'ออกแบบ', 'text' => 'จัดฟังก์ชันให้เข้ากับชีวิตจริง'],
+                    ['no' => '3', 'title' => 'ผลิต', 'text' => 'งานไม้สนโดยทีมช่างของเรา'],
+                    ['no' => '4', 'title' => 'ติดตั้ง', 'text' => 'ส่งมอบพร้อมตรวจรายละเอียด'],
+                ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $step): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <article class="rounded-[22px] bg-white p-6 shadow-[0_18px_42px_rgba(93,66,39,.08)] ring-1 ring-pine-100">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-pine-700 text-lg font-semibold text-white"><?php echo e($step['no']); ?></div>
+                        <h3 class="mt-5 text-xl font-semibold text-ink"><?php echo e($step['title']); ?></h3>
+                        <p class="mt-2 text-sm leading-6 text-pine-700"><?php echo e($step['text']); ?></p>
+                    </article>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+        </div>
+    </section>
 
-    <?php if($finalCta?->active): ?>
-        <section class="bg-pine-700">
-            <div class="mx-auto max-w-5xl px-5 py-14 text-center">
-                <p class="text-sm font-semibold text-pine-100"><?php echo e($finalCta->subtitle); ?></p>
-                <h2 class="mt-2 text-3xl font-semibold text-white"><?php echo e($finalCta->title); ?></h2>
-                <p class="mx-auto mt-4 max-w-2xl leading-8 text-pine-100"><?php echo e($finalCta->description); ?></p>
-                <a href="<?php echo e($finalCta->button_url ?: route('lead.create')); ?>" class="mt-8 inline-flex rounded-full bg-white px-6 py-3 font-semibold text-pine-700 hover:bg-pine-50"><?php echo e($finalCta->button_text ?: 'ขอประเมินราคา'); ?></a>
+    <section class="px-5 py-12">
+        <div class="mx-auto max-w-6xl overflow-hidden rounded-[24px] bg-pine-700 shadow-[0_24px_70px_rgba(93,66,39,.22)] md:grid md:grid-cols-[1.1fr_.9fr]">
+            <div class="p-8 text-white md:p-12">
+                <p class="text-sm font-semibold text-pine-100">START YOUR CUSTOM PROJECT</p>
+                <h2 class="mt-3 text-4xl font-semibold leading-tight md:text-6xl">เริ่มต้นสร้างบ้านในฝันของคุณ</h2>
+                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a href="<?php echo e(route('lead.create')); ?>" class="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 font-semibold text-pine-700 hover:bg-pine-50">ขอแบบและประเมินฟรี</a>
+                    <?php if($company->line_oa_url): ?>
+                        <a href="<?php echo e($company->line_oa_url); ?>" class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/60 px-6 py-3 font-semibold text-white hover:bg-white/10">ติดต่อผ่าน LINE</a>
+                    <?php endif; ?>
+                </div>
             </div>
-        </section>
-    <?php endif; ?>
+            <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=85" alt="บ้านอบอุ่นพร้อมเฟอร์นิเจอร์ไม้สน" class="h-full min-h-72 w-full object-cover">
+        </div>
+    </section>
+
+    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-pine-100 bg-white/95 p-3 shadow-[0_-10px_30px_rgba(93,66,39,.12)] backdrop-blur md:hidden">
+        <div class="mx-auto flex max-w-[420px] gap-2">
+            <a href="<?php echo e(route('portfolio.index')); ?>" class="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-pine-50 px-4 text-sm font-semibold text-pine-700">ดูผลงาน</a>
+            <a href="<?php echo e(route('lead.create')); ?>" class="inline-flex min-h-12 flex-[1.35] items-center justify-center rounded-full bg-pine-700 px-4 text-sm font-semibold text-white">ขอแบบฟรี</a>
+        </div>
+    </div>
+</div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => 'Wooden Dad Design | เฟอร์นิเจอร์ไม้สนสั่งทำ'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\home.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.public', ['title' => company()->display_name.' | เฟอร์นิเจอร์ไม้สนสั่งทำสำหรับบ้านของคุณ'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\home.blade.php ENDPATH**/ ?>

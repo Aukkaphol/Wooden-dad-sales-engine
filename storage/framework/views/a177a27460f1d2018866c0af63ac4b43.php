@@ -4,7 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    <title><?php echo e($title ?? 'Wooden Dad Design'); ?></title>
+    <?php
+        $company = company();
+    ?>
+    <title><?php echo e($title ?? $company->display_name); ?></title>
+    <?php if($company->favicon_url): ?>
+        <link rel="icon" href="<?php echo e($company->favicon_url); ?>">
+    <?php endif; ?>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=noto-sans-thai:400,500,600,700" rel="stylesheet">
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
@@ -12,7 +18,7 @@
 <body class="min-h-screen bg-pine-50 text-ink antialiased">
     <header class="border-b border-pine-200/70 bg-white/85 backdrop-blur">
         <div class="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <a href="<?php echo e(route('home')); ?>" class="text-lg font-semibold tracking-normal text-pine-700">Wooden Dad Design</a>
+            <a href="<?php echo e(route('home')); ?>" class="text-lg font-semibold tracking-normal text-pine-700"><?php echo e($company->display_name); ?></a>
             <nav class="flex flex-wrap items-center justify-center gap-3 text-sm font-medium text-pine-700 sm:justify-end sm:gap-4">
                 <a href="<?php echo e(route('home')); ?>" class="hover:text-ink">หน้าแรก</a>
                 <a href="<?php echo e(route('bedroom-set')); ?>" class="hover:text-ink">ชุดห้องนอน</a>
@@ -44,7 +50,7 @@
 
     <footer class="border-t border-pine-200 bg-white">
         <div class="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 text-sm text-pine-700 md:flex-row md:items-center md:justify-between">
-            <p>Wooden Dad Design เฟอร์นิเจอร์ไม้สนสไตล์เรียบ อบอุ่น ใช้งานจริง</p>
+            <p><?php echo e($company->display_name); ?> เฟอร์นิเจอร์ไม้สนสไตล์เรียบ อบอุ่น ใช้งานจริง</p>
             <p>ผลิตตามพื้นที่จริง ส่งงานด้วยรายละเอียดที่คุยกันชัดเจน</p>
         </div>
     </footer>

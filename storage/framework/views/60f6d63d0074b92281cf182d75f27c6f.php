@@ -37,7 +37,9 @@
 
                             <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 <?php $__currentLoopData = $monthOrders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <?php ($statusLabel = $statusLabels[$order->installation_status] ?? 'รอตรวจสอบสถานะ'); ?>
+                                    <?php
+                                        $statusLabel = $statusLabels[$order->installation_status] ?? 'รอตรวจสอบสถานะ';
+                                    ?>
                                     <article class="rounded-lg border border-pine-200 bg-pine-50 p-4">
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="min-w-0">
@@ -81,4 +83,4 @@
     </section>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => 'ตารางส่งมอบและติดตั้ง | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\installation-schedule\index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => 'ตารางส่งมอบและติดตั้ง | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\installation-schedule\index.blade.php ENDPATH**/ ?>

@@ -36,7 +36,8 @@ Laravel 12 sales landing system for Wooden Dad Design, focused on Bedroom Set le
 LINE_CHANNEL_ACCESS_TOKEN=ใส่ Channel access token จาก LINE Developers
 LINE_USER_ID=ใส่ userId ของแอดมิน ถ้าต้องการ push หาแอดมินคนเดียว
 LINE_GROUP_ID=ใส่ groupId ถ้าต้องการ push เข้ากลุ่มแอดมิน
-LINE_ADMIN_BASE_URL=http://127.0.0.1:8000
+APP_URL=https://woodendaddesign.com
+LINE_ADMIN_BASE_URL=${APP_URL}
 ```
 
 การส่งข้อความจะเลือก `LINE_GROUP_ID` ก่อน ถ้าไม่มีจะใช้ `LINE_USER_ID` ถ้าไม่มีทั้งคู่ระบบจะใช้ broadcast message ไปยังผู้ติดตาม LINE OA แทน
@@ -54,7 +55,7 @@ LINE_ADMIN_BASE_URL=http://127.0.0.1:8000
 ข้อความ:
 
 ดูรายละเอียด:
-http://127.0.0.1:8000/admin/leads/{id}
+https://woodendaddesign.com/admin/leads/{id}
 ```
 
 ## Setup

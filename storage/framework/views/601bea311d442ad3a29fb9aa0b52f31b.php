@@ -3,126 +3,113 @@
     <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="mb-8 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-                <p class="text-sm font-semibold text-pine-500">การตลาด</p>
-                <h1 class="mt-2 text-3xl font-semibold text-ink">เชื่อมต่อ Facebook</h1>
-                <p class="mt-2 text-sm leading-6 text-pine-700">ตั้งค่า Facebook Page API เพื่อเตรียมรับ Lead Ads, Messenger และ Webhook สำหรับ Wooden Dad Design CRM</p>
+                <p class="text-sm font-semibold text-pine-500">Marketing Integration</p>
+                <h1 class="mt-2 text-3xl font-semibold text-ink">เชื่อมต่อ Facebook Page API</h1>
+                <p class="mt-2 text-sm leading-6 text-pine-700">ตั้งค่า Facebook Lead Ads Webhook เพื่อรับลีดเข้าสู่ CRM Pipeline เดียวกับ Website และ LINE OA</p>
             </div>
-            <a href="<?php echo e(route('admin.leads.index')); ?>" class="w-fit rounded-md bg-white px-4 py-2 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-100">ดู CRM Lead</a>
+            <a href="<?php echo e(route('admin.marketing.facebook-leads')); ?>" class="w-fit rounded-xl bg-white px-4 py-2 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-100">ดู Facebook Leads</a>
         </div>
 
         <?php if(session('success')): ?>
-            <div class="mb-6 rounded-md bg-green-50 p-4 text-sm font-medium text-green-800 ring-1 ring-green-600/20"><?php echo e(session('success')); ?></div>
+            <div class="mb-6 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-800 ring-1 ring-green-600/20"><?php echo e(session('success')); ?></div>
         <?php endif; ?>
 
         <?php if(session('error')): ?>
-            <div class="mb-6 rounded-md bg-rose-50 p-4 text-sm font-medium text-rose-800 ring-1 ring-rose-600/20"><?php echo e(session('error')); ?></div>
+            <div class="mb-6 rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-800 ring-1 ring-rose-600/20"><?php echo e(session('error')); ?></div>
         <?php endif; ?>
 
         <?php if($errors->any()): ?>
-            <div class="mb-6 rounded-md bg-rose-50 p-4 text-sm font-medium text-rose-800 ring-1 ring-rose-600/20"><?php echo e($errors->first()); ?></div>
+            <div class="mb-6 rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-800 ring-1 ring-rose-600/20"><?php echo e($errors->first()); ?></div>
         <?php endif; ?>
 
         <div class="mb-6 grid gap-4 md:grid-cols-3">
-            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-pine-200">
-                <p class="text-sm text-pine-700">สถานะการตั้งค่า</p>
-                <p class="mt-2 text-2xl font-semibold <?php echo e($setting->active ? 'text-green-700' : 'text-rose-700'); ?>"><?php echo e($setting->active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'); ?></p>
+            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-pine-200">
+                <p class="text-sm text-pine-700">สถานะ</p>
+                <p class="mt-2 text-2xl font-semibold <?php echo e($setting->facebook_enabled ? 'text-green-700' : 'text-rose-700'); ?>"><?php echo e($setting->facebook_enabled ? 'Enabled' : 'Disabled'); ?></p>
             </div>
-            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-pine-200">
+            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-pine-200">
                 <p class="text-sm text-pine-700">Page Access Token</p>
                 <p class="mt-2 break-all text-lg font-semibold text-ink"><?php echo e($setting->masked_page_access_token); ?></p>
             </div>
-            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-pine-200">
-                <p class="text-sm text-pine-700">Webhook ล่าสุด</p>
-                <p class="mt-2 text-lg font-semibold text-ink"><?php echo e($latestLog?->status ?? 'ยังไม่มีข้อมูล'); ?></p>
-                <?php if($latestLog): ?>
-                    <p class="mt-1 text-xs text-pine-600"><?php echo e($latestLog->created_at->format('d/m/Y H:i')); ?></p>
-                <?php endif; ?>
+            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-pine-200">
+                <p class="text-sm text-pine-700">Last Synced</p>
+                <p class="mt-2 text-lg font-semibold text-ink"><?php echo e($setting->facebook_last_synced_at?->format('d/m/Y H:i') ?? '-'); ?></p>
             </div>
         </div>
 
-        <form method="post" action="<?php echo e(route('admin.settings.facebook.update')); ?>" class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200">
+        <form method="post" action="<?php echo e(route('admin.settings.facebook.update')); ?>" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-pine-200">
             <?php echo csrf_field(); ?>
             <div class="grid gap-5 md:grid-cols-2">
                 <label>
                     <span class="text-sm font-semibold text-ink">Page Name</span>
-                    <input name="page_name" value="<?php echo e(old('page_name', $setting->page_name)); ?>" class="mt-2 w-full rounded-md border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                    <input name="page_name" value="<?php echo e(old('page_name', $setting->page_name)); ?>" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
                 </label>
                 <label>
-                    <span class="text-sm font-semibold text-ink">Page ID</span>
-                    <input name="page_id" value="<?php echo e(old('page_id', $setting->page_id)); ?>" class="mt-2 w-full rounded-md border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                    <span class="text-sm font-semibold text-ink">Facebook Page ID</span>
+                    <input name="facebook_page_id" value="<?php echo e(old('facebook_page_id', $setting->facebook_page_id ?: $setting->page_id)); ?>" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                </label>
+                <label>
+                    <span class="text-sm font-semibold text-ink">Facebook App ID</span>
+                    <input name="facebook_app_id" value="<?php echo e(old('facebook_app_id', $setting->facebook_app_id ?: $setting->app_id)); ?>" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                </label>
+                <label>
+                    <span class="text-sm font-semibold text-ink">Facebook App Secret</span>
+                    <input name="facebook_app_secret" type="password" autocomplete="new-password" placeholder="ใส่ค่าใหม่เมื่อต้องการเปลี่ยน" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
                 </label>
                 <label class="md:col-span-2">
-                    <span class="text-sm font-semibold text-ink">Page Access Token</span>
-                    <input name="page_access_token" type="password" placeholder="ใส่ค่าใหม่เมื่อต้องการเปลี่ยน Token เท่านั้น" autocomplete="new-password" class="mt-2 w-full rounded-md border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
-                    <span class="mt-1 block text-xs text-pine-600">ระบบจะแสดง Token แบบย่อเท่านั้น: <?php echo e($setting->masked_page_access_token); ?></span>
+                    <span class="text-sm font-semibold text-ink">Facebook Page Access Token</span>
+                    <input name="facebook_page_access_token" type="password" autocomplete="new-password" placeholder="ใส่ค่าใหม่เมื่อต้องการเปลี่ยน Token เท่านั้น" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                    <span class="mt-1 block text-xs text-pine-600">ระบบจะแสดง Token แบบ Mask เท่านั้น: <?php echo e($setting->masked_page_access_token); ?></span>
                 </label>
                 <label>
-                    <span class="text-sm font-semibold text-ink">App ID</span>
-                    <input name="app_id" value="<?php echo e(old('app_id', $setting->app_id)); ?>" class="mt-2 w-full rounded-md border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
-                </label>
-                <label>
-                    <span class="text-sm font-semibold text-ink">App Secret</span>
-                    <input name="app_secret" type="password" value="<?php echo e(old('app_secret', $setting->app_secret)); ?>" autocomplete="new-password" class="mt-2 w-full rounded-md border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
-                </label>
-                <label class="md:col-span-2">
                     <span class="text-sm font-semibold text-ink">Webhook Verify Token</span>
-                    <input name="webhook_verify_token" value="<?php echo e(old('webhook_verify_token', $setting->webhook_verify_token)); ?>" class="mt-2 w-full rounded-md border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
-                    <span class="mt-1 block text-xs text-pine-600">ใช้ค่านี้ใน Facebook Developer Webhook Verify URL: <?php echo e(route('webhooks.facebook.verify')); ?></span>
+                    <input name="facebook_webhook_verify_token" value="<?php echo e(old('facebook_webhook_verify_token', $setting->facebook_webhook_verify_token ?: $setting->webhook_verify_token)); ?>" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                </label>
+                <label>
+                    <span class="text-sm font-semibold text-ink">Webhook Callback URL</span>
+                    <input name="facebook_webhook_callback_url" value="<?php echo e(old('facebook_webhook_callback_url', $callbackUrl)); ?>" class="mt-2 w-full rounded-xl border-0 bg-pine-50 px-3 py-2.5 text-sm ring-1 ring-pine-200">
+                    <span class="mt-1 block break-all text-xs text-pine-600"><?php echo e($callbackUrl); ?></span>
                 </label>
             </div>
 
-            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <label class="flex items-center gap-3 rounded-md bg-pine-50 p-4 ring-1 ring-pine-200">
-                    <input type="checkbox" name="active" value="1" <?php if($setting->active): echo 'checked'; endif; ?> class="rounded border-pine-300">
-                    <span class="text-sm font-semibold text-ink">เปิดใช้งาน</span>
+            <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                <label class="flex items-center gap-3 rounded-xl bg-pine-50 p-4 ring-1 ring-pine-200">
+                    <input type="checkbox" name="facebook_enabled" value="1" <?php if(old('facebook_enabled', $setting->facebook_enabled ?: $setting->active)): echo 'checked'; endif; ?> class="rounded border-pine-300">
+                    <span class="text-sm font-semibold text-ink">Enabled / รับ Facebook Lead Ads</span>
                 </label>
-                <label class="flex items-center gap-3 rounded-md bg-pine-50 p-4 ring-1 ring-pine-200">
-                    <input type="checkbox" name="webhook_enabled" value="1" <?php if($setting->webhook_enabled): echo 'checked'; endif; ?> class="rounded border-pine-300">
-                    <span class="text-sm font-semibold text-ink">เปิด Webhook</span>
-                </label>
-                <label class="flex items-center gap-3 rounded-md bg-pine-50 p-4 ring-1 ring-pine-200">
-                    <input type="checkbox" name="lead_ads_enabled" value="1" <?php if($setting->lead_ads_enabled): echo 'checked'; endif; ?> class="rounded border-pine-300">
-                    <span class="text-sm font-semibold text-ink">เปิด Lead Ads</span>
-                </label>
-                <label class="flex items-center gap-3 rounded-md bg-pine-50 p-4 ring-1 ring-pine-200">
-                    <input type="checkbox" name="messenger_enabled" value="1" <?php if($setting->messenger_enabled): echo 'checked'; endif; ?> class="rounded border-pine-300">
-                    <span class="text-sm font-semibold text-ink">เปิด Messenger</span>
-                </label>
+                <div class="rounded-xl bg-pine-50 p-4 text-sm text-pine-700 ring-1 ring-pine-200">
+                    <p class="font-semibold text-ink">Webhook Verify URL</p>
+                    <p class="mt-1 break-all"><?php echo e(route('webhooks.facebook.verify')); ?></p>
+                </div>
             </div>
 
             <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button name="action" value="save" class="rounded-md bg-pine-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pine-500">บันทึกการตั้งค่า</button>
-                <button name="action" value="test" class="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-50">ทดสอบการเชื่อมต่อ Facebook</button>
+                <button name="action" value="save" class="rounded-xl bg-pine-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pine-500">บันทึกการตั้งค่า</button>
+                <button name="action" value="test" class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-50">Test Connection</button>
             </div>
         </form>
 
-        <section class="mt-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200">
-            <h2 class="text-xl font-semibold text-ink">สถานะล่าสุดของการเชื่อมต่อ</h2>
+        <section class="mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-pine-200">
+            <h2 class="text-xl font-semibold text-ink">Webhook Events ล่าสุด</h2>
             <div class="mt-4 grid gap-4 md:grid-cols-2">
-                <div class="rounded-md bg-pine-50 p-4">
-                    <p class="text-sm text-pine-700">Lead Ads</p>
-                    <p class="mt-1 font-semibold text-ink"><?php echo e($setting->lead_ads_enabled ? 'พร้อมรับ Lead Ads' : 'ยังไม่เปิดใช้งาน'); ?></p>
+                <div class="rounded-xl bg-pine-50 p-4 ring-1 ring-pine-200">
+                    <p class="text-sm font-semibold text-pine-700">Raw Event</p>
+                    <p class="mt-2 text-sm text-ink">Type: <?php echo e($latestEvent?->event_type ?: '-'); ?></p>
+                    <p class="mt-1 text-sm text-ink">Leadgen ID: <?php echo e($latestEvent?->leadgen_id ?: '-'); ?></p>
+                    <p class="mt-1 text-sm text-pine-700">Processed: <?php echo e($latestEvent?->processed_at?->format('d/m/Y H:i') ?? '-'); ?></p>
                 </div>
-                <div class="rounded-md bg-pine-50 p-4">
-                    <p class="text-sm text-pine-700">Messenger</p>
-                    <p class="mt-1 font-semibold text-ink"><?php echo e($setting->messenger_enabled ? 'พร้อมบันทึกข้อความ Messenger' : 'บันทึก log เท่านั้น'); ?></p>
-                </div>
-            </div>
-
-            <?php if($latestLog): ?>
-                <div class="mt-5 rounded-md border border-pine-200 p-4">
-                    <p class="text-sm text-pine-700">Webhook Log ล่าสุด</p>
-                    <p class="mt-2 text-sm text-ink">ประเภท: <?php echo e($latestLog->event_type ?: '-'); ?></p>
-                    <p class="mt-1 text-sm text-ink">Page ID: <?php echo e($latestLog->page_id ?: '-'); ?></p>
-                    <p class="mt-1 text-sm text-ink">สถานะ: <?php echo e($latestLog->status); ?></p>
-                    <?php if($latestLog->error_message): ?>
-                        <p class="mt-1 break-words text-sm text-rose-700">ข้อผิดพลาด: <?php echo e($latestLog->error_message); ?></p>
+                <div class="rounded-xl bg-pine-50 p-4 ring-1 ring-pine-200">
+                    <p class="text-sm font-semibold text-pine-700">Legacy Log</p>
+                    <p class="mt-2 text-sm text-ink">Type: <?php echo e($latestLog?->event_type ?: '-'); ?></p>
+                    <p class="mt-1 text-sm text-ink">Status: <?php echo e($latestLog?->status ?: '-'); ?></p>
+                    <?php if($latestLog?->error_message): ?>
+                        <p class="mt-1 break-words text-sm text-rose-700"><?php echo e($latestLog->error_message); ?></p>
                     <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            </div>
         </section>
     </div>
 </section>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => 'เชื่อมต่อ Facebook | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views/admin/settings/facebook.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => 'เชื่อมต่อ Facebook | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views/admin/settings/facebook.blade.php ENDPATH**/ ?>

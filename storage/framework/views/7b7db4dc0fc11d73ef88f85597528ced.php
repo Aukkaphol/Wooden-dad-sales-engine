@@ -4,7 +4,7 @@
             <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p class="text-sm font-semibold text-pine-500">คิวงานผลิต</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-ink">คิวงานผลิต Wooden Dad Design</h1>
+                    <h1 class="mt-2 text-3xl font-semibold text-ink">คิวงานผลิต <?php echo e(company()->display_name); ?></h1>
                     <p class="mt-2 text-sm text-pine-700">สร้างจากใบเสนอราคาที่อนุมัติแล้ว และผูกกับข้อมูลลูกค้า/ใบเสนอราคาเดิมทั้งหมด</p>
                 </div>
                 <a href="<?php echo e(route('admin.leads.index')); ?>" class="inline-flex w-fit rounded-md bg-white px-4 py-2 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-100">กลับ CRM</a>
@@ -159,4 +159,4 @@
     </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => 'คิวงานผลิต | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\production\index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => 'คิวงานผลิต | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\production\index.blade.php ENDPATH**/ ?>

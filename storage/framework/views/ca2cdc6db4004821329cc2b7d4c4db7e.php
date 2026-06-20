@@ -1,0 +1,5 @@
+<?php $__env->startSection('content'); ?>
+<section class="bg-pine-50"><div class="mx-auto max-w-4xl px-4 py-8"><a href="<?php echo e(route('admin.products.index')); ?>" class="text-sm font-semibold text-pine-700">กลับ</a><h1 class="mt-2 mb-6 text-3xl font-semibold text-ink">เพิ่มสินค้า</h1><?php echo $__env->make('admin.products._form', ['action' => route('admin.products.store'), 'method' => 'POST', 'submitLabel' => 'บันทึกสินค้า'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?></div></section>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', ['title' => 'เพิ่มสินค้า | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\products\create.blade.php ENDPATH**/ ?>

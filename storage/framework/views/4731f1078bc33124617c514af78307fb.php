@@ -96,7 +96,9 @@
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
             <?php $__currentLoopData = [['label' => 'Workflow Section', 'section' => $workflow], ['label' => 'Trust Section', 'section' => $trust], ['label' => 'CTA ท้ายหน้า', 'section' => $finalCta]]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $block): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if($block['section']): ?>
-                    <?php ($section = $block['section']); ?>
+                    <?php
+                        $section = $block['section'];
+                    ?>
                     <form method="post" action="<?php echo e(route('admin.marketing.homepage.sections.update', $section)); ?>" class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-pine-200">
                         <?php echo csrf_field(); ?>
                         <h2 class="text-lg font-semibold text-ink"><?php echo e($block['label']); ?></h2>
@@ -141,4 +143,4 @@
 </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', ['title' => 'จัดการหน้าแรก | Wooden Dad Design'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\marketing\homepage.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', ['title' => 'จัดการหน้าแรก | '.company()->display_name], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\BEER\Documents\Codex\2026-06-17\create-a-laravel-12-project-named\wooden-dad-sales-engine\resources\views\admin\marketing\homepage.blade.php ENDPATH**/ ?>
