@@ -201,7 +201,12 @@ class LineNotificationService
                 'response_status' => $response->status(),
                 'error_message' => $response->body(),
             ]);
-            Log::warning('LINE notification failed.', ['event' => $event, 'channel' => $channel, 'status' => $response->status()]);
+            Log::warning('LINE notification failed.', [
+                'event' => $event,
+                'channel' => $channel,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
         } catch (Throwable $exception) {
             $this->recordLog($baseLog + ['status' => 'failed', 'error_message' => $exception->getMessage()]);
             Log::warning('LINE notification failed.', [
@@ -224,6 +229,12 @@ class LineNotificationService
     private function routeUrl(string $name, mixed $parameters = []): string
     {
         $baseUrl = rtrim((string) config('app.url'), '/');
+        $parameters = is_array($parameters) ? $parameters : [$parameters];
+
+        if (! array_key_exists('locale', $parameters)) {
+            $parameters = ['locale' => app()->getLocale() ?: session('locale', 'th')] + $parameters;
+        }
+
         $path = route($name, $parameters, false);
 
         return rtrim($baseUrl, '/').$path;

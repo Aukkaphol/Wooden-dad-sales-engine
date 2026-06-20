@@ -21,8 +21,20 @@ class SetLocaleFromUrl
 
         App::setLocale($locale);
         URL::defaults(['locale' => $locale]);
+        $alternateLocale = $locale === 'th' ? 'en' : 'th';
+        $segments = $request->segments();
+
+        if (isset($segments[0]) && in_array($segments[0], ['th', 'en'], true)) {
+            $segments[0] = $alternateLocale;
+        } else {
+            array_unshift($segments, $alternateLocale);
+        }
+
+        $alternateLocaleUrl = url(implode('/', $segments)).($request->getQueryString() ? '?'.$request->getQueryString() : '');
+
         View::share('currentLocale', $locale);
-        View::share('alternateLocale', $locale === 'th' ? 'en' : 'th');
+        View::share('alternateLocale', $alternateLocale);
+        View::share('alternateLocaleUrl', $alternateLocaleUrl);
         session(['locale' => $locale]);
 
         return $next($request);

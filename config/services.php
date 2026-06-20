@@ -6,5 +6,6 @@ return [
         'user_id' => env('LINE_USER_ID'),
         'group_id' => env('LINE_GROUP_ID'),
         'admin_base_url' => env('LINE_ADMIN_BASE_URL', env('APP_URL', 'https://woodendaddesign.com')),
+        'contact_url' => env('LINE_CONTACT_URL', 'https://line.me/R/ti/p/@beerklung'),
     ],
 ];

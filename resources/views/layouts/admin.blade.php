@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,43 +17,58 @@
 </head>
 <body class="min-h-screen bg-pine-50 text-ink antialiased">
     @php
+        $currentLocale = app()->getLocale();
+        $localizedPath = function (string $locale): string {
+            $segments = request()->segments();
+
+            if (isset($segments[0]) && in_array($segments[0], ['th', 'en'], true)) {
+                $segments[0] = $locale;
+            } else {
+                array_unshift($segments, $locale);
+            }
+
+            $path = implode('/', $segments);
+            $query = request()->getQueryString();
+
+            return url($path).($query ? '?'.$query : '');
+        };
         $menuGroups = [
-            'Dashboard' => [
-                ['label' => 'แดชบอร์ด', 'route' => 'admin.dashboard'],
+            __('admin.groups.dashboard') => [
+                ['label' => __('admin.nav.dashboard'), 'route' => 'admin.dashboard'],
             ],
-            'Marketing' => [
-                ['label' => 'Overview', 'route' => 'admin.dashboard'],
-                ['label' => 'Website Leads', 'route' => 'admin.marketing.website-leads'],
-                ['label' => 'Facebook Leads', 'route' => 'admin.marketing.facebook-leads'],
-                ['label' => 'LINE OA Leads', 'route' => 'admin.marketing.line-leads'],
-                ['label' => 'Reviews', 'route' => 'admin.marketing.reviews.index'],
-                ['label' => 'Portfolio', 'route' => 'admin.portfolio.index'],
-                ['label' => 'Campaigns', 'route' => 'admin.marketing.campaigns'],
-                ['label' => 'Analytics', 'route' => 'admin.marketing.analytics'],
+            __('admin.groups.marketing') => [
+                ['label' => __('admin.nav.overview'), 'route' => 'admin.dashboard'],
+                ['label' => __('admin.nav.website_leads'), 'route' => 'admin.marketing.website-leads'],
+                ['label' => __('admin.nav.facebook_leads'), 'route' => 'admin.marketing.facebook-leads'],
+                ['label' => __('admin.nav.line_leads'), 'route' => 'admin.marketing.line-leads'],
+                ['label' => __('admin.nav.reviews'), 'route' => 'admin.marketing.reviews.index'],
+                ['label' => __('admin.nav.portfolio'), 'route' => 'admin.portfolio.index'],
+                ['label' => __('admin.nav.campaigns'), 'route' => 'admin.marketing.campaigns'],
+                ['label' => __('admin.nav.analytics'), 'route' => 'admin.marketing.analytics'],
             ],
-            'Sales' => [
-                ['label' => 'CRM Pipeline', 'route' => 'admin.leads.index'],
-                ['label' => 'Quotations (QTN)', 'route' => 'admin.quotations.index'],
-                ['label' => 'Customers', 'route' => 'admin.leads.index'],
+            __('admin.groups.sales') => [
+                ['label' => __('admin.nav.crm_customers'), 'route' => 'admin.leads.index'],
+                ['label' => __('admin.nav.quotations'), 'route' => 'admin.quotations.index'],
+                ['label' => __('admin.nav.customers'), 'route' => 'admin.leads.index'],
             ],
-            'Production' => [
-                ['label' => 'Production Orders (PO)', 'route' => 'admin.production.index'],
-                ['label' => 'Work Schedule', 'route' => 'admin.production.index'],
-                ['label' => 'Installation Schedule', 'route' => 'admin.installation.index'],
+            __('admin.groups.production') => [
+                ['label' => __('admin.nav.production'), 'route' => 'admin.production.index'],
+                ['label' => __('admin.nav.work_schedule'), 'route' => 'admin.production.index'],
+                ['label' => __('admin.nav.installation_schedule'), 'route' => 'admin.installation.index'],
             ],
-            'Inventory' => [
-                ['label' => 'Products', 'route' => 'admin.products.index'],
-                ['label' => 'BOM', 'route' => 'admin.products.index'],
-                ['label' => 'Material Stock', 'route' => 'admin.materials.index'],
-                ['label' => 'Purchase Requests', 'route' => 'admin.purchase-requests.index'],
+            __('admin.groups.inventory') => [
+                ['label' => __('admin.nav.products'), 'route' => 'admin.products.index'],
+                ['label' => __('admin.nav.bom'), 'route' => 'admin.products.index'],
+                ['label' => __('admin.nav.materials'), 'route' => 'admin.materials.index'],
+                ['label' => __('admin.nav.purchase_requests'), 'route' => 'admin.purchase-requests.index'],
             ],
-            'Settings' => [
-                ['label' => 'Company Profile', 'route' => 'admin.settings.company.edit', 'anchor' => 'company'],
-                ['label' => 'Social Media', 'route' => 'admin.settings.company.edit', 'anchor' => 'social'],
-                ['label' => 'LINE OA', 'route' => 'admin.settings.line.edit'],
-                ['label' => 'Facebook', 'route' => 'admin.settings.facebook.edit'],
-                ['label' => 'Website', 'route' => 'admin.marketing.homepage'],
-                ['label' => 'Users & Roles', 'route' => 'admin.settings.users-roles'],
+            __('admin.groups.settings') => [
+                ['label' => __('admin.nav.company_settings'), 'route' => 'admin.settings.company.edit', 'anchor' => 'company'],
+                ['label' => __('admin.nav.social_media'), 'route' => 'admin.settings.company.edit', 'anchor' => 'social'],
+                ['label' => __('admin.nav.line_settings'), 'route' => 'admin.settings.line.edit'],
+                ['label' => __('admin.nav.facebook_settings'), 'route' => 'admin.settings.facebook.edit'],
+                ['label' => __('admin.nav.website'), 'route' => 'admin.marketing.homepage'],
+                ['label' => __('admin.nav.user_roles'), 'route' => 'admin.settings.users-roles'],
             ],
         ];
     @endphp
@@ -68,7 +83,7 @@
                 @endif
                 <span class="min-w-0">
                     <span class="block truncate font-semibold text-ink">{{ $company->display_name }}</span>
-                    <span class="block text-xs font-medium text-pine-700">Sales CRM + Marketing</span>
+                    <span class="block text-xs font-medium text-pine-700">{{ __('admin.topbar.workspace') }}</span>
                 </span>
             </a>
 
@@ -99,6 +114,10 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5 group-open:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                         </summary>
                         <div class="absolute left-0 top-14 max-h-[78vh] w-[min(88vw,360px)] overflow-y-auto rounded-2xl border border-pine-100 bg-white p-4 shadow-[0_24px_70px_rgba(28,23,18,.20)]">
+                            <div class="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-pine-50 p-1 text-center text-xs font-semibold text-pine-700 ring-1 ring-pine-100">
+                                <a href="{{ $localizedPath('th') }}" class="rounded-xl px-3 py-2 {{ $currentLocale === 'th' ? 'bg-white text-ink shadow-sm' : '' }}">TH</a>
+                                <a href="{{ $localizedPath('en') }}" class="rounded-xl px-3 py-2 {{ $currentLocale === 'en' ? 'bg-white text-ink shadow-sm' : '' }}">EN</a>
+                            </div>
                             @foreach ($menuGroups as $group => $items)
                                 <section class="mb-4">
                                     <p class="px-2 text-xs font-semibold uppercase tracking-wide text-pine-500">{{ $group }}</p>
@@ -114,17 +133,21 @@
 
                     <div class="min-w-0">
                         <p class="truncate text-sm font-semibold text-pine-500">{{ $company->display_name }}</p>
-                        <h1 class="truncate text-lg font-semibold text-ink">{{ $title ?? 'แดชบอร์ด' }}</h1>
+                        <h1 class="truncate text-lg font-semibold text-ink">{{ $title ?? __('admin.nav.dashboard') }}</h1>
                     </div>
 
                     <div class="flex items-center gap-3">
+                        <div class="hidden items-center rounded-full bg-pine-50 p-1 text-xs font-semibold text-pine-700 ring-1 ring-pine-200 sm:flex">
+                            <a href="{{ $localizedPath('th') }}" class="rounded-full px-2.5 py-1 {{ $currentLocale === 'th' ? 'bg-white text-ink shadow-sm' : '' }}">TH</a>
+                            <a href="{{ $localizedPath('en') }}" class="rounded-full px-2.5 py-1 {{ $currentLocale === 'en' ? 'bg-white text-ink shadow-sm' : '' }}">EN</a>
+                        </div>
                         <div class="hidden text-right sm:block">
                             <p class="text-sm font-semibold text-ink">{{ auth()->user()->name ?? 'Admin' }}</p>
-                            <p class="text-xs text-pine-600">ผู้ดูแลระบบ</p>
+                            <p class="text-xs text-pine-600">{{ __('admin.topbar.admin') }}</p>
                         </div>
                         <form method="post" action="{{ route('logout') }}">
                             @csrf
-                            <button class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-50">ออกจากระบบ</button>
+                            <button class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-pine-700 ring-1 ring-pine-200 hover:bg-pine-50">{{ __('admin.nav.logout') }}</button>
                         </form>
                     </div>
                 </div>

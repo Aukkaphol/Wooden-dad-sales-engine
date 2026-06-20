@@ -78,7 +78,10 @@ class LineNotifyService
     private function newLeadMessage(Lead $lead): string
     {
         $company = company();
-        $detailUrl = rtrim((string) config('app.url'), '/').route('admin.leads.show', $lead, false);
+        $detailUrl = rtrim((string) config('app.url'), '/').route('admin.leads.show', [
+            'locale' => app()->getLocale() ?: session('locale', 'th'),
+            'lead' => $lead,
+        ], false);
 
         return "🪵 ลูกค้าใหม่จากเว็บไซต์\n\n"
             ."ชื่อ: {$lead->name}\n"
