@@ -42,7 +42,7 @@ class AdminInventoryController extends Controller
         ]);
     }
 
-    public function storeTransaction(Request $request, string $locale, Material $material): RedirectResponse
+    public function storeTransaction(Request $request, Material $material): RedirectResponse
     {
         $validated = $request->validate([
             'type' => ['required', 'string', 'in:receive,adjust,consume'],

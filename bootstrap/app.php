@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Middleware\SetLocaleFromUrl;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,10 +11,24 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->validateCsrfTokens(except: [
-            'webhooks/facebook',
+
+    $middleware->alias([
+        'setlocale' => SetLocaleFromUrl::class,
+    ]);
+
+    $middleware->redirectGuestsTo(function ($request) {
+        $locale = $request->route('locale') ?? 'th';
+
+        return route('login', [
+            'locale' => $locale
         ]);
-    })
+    });
+
+    $middleware->validateCsrfTokens(except: [
+        'webhooks/line',
+        'webhooks/facebook',
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

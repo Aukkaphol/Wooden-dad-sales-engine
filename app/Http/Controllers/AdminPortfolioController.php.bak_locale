@@ -45,7 +45,7 @@ class AdminPortfolioController extends Controller
         return back()->with('success', 'เพิ่มรูปผลงานเรียบร้อยแล้ว');
     }
 
-    public function update(Request $request, string $locale, PortfolioImage $portfolioImage): RedirectResponse
+    public function update(Request $request, PortfolioImage $portfolioImage): RedirectResponse
     {
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
@@ -64,7 +64,7 @@ class AdminPortfolioController extends Controller
         return back()->with('success', 'อัปเดตรูปผลงานเรียบร้อยแล้ว');
     }
 
-    public function destroy(string $locale, PortfolioImage $portfolioImage): RedirectResponse
+    public function destroy(PortfolioImage $portfolioImage): RedirectResponse
     {
         Storage::disk('public')->delete($portfolioImage->image_path);
         $portfolioImage->delete();

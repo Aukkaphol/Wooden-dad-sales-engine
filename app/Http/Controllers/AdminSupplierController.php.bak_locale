@@ -30,19 +30,19 @@ class AdminSupplierController extends Controller
         return redirect()->route('admin.suppliers.show', $supplier)->with('success', 'บันทึกผู้จำหน่ายเรียบร้อยแล้ว');
     }
 
-    public function show(string $locale, Supplier $supplier): View
+    public function show(Supplier $supplier): View
     {
         $supplier->load(['purchaseOrders.items.material']);
 
         return view('admin.suppliers.show', ['supplier' => $supplier]);
     }
 
-    public function edit(string $locale, Supplier $supplier): View
+    public function edit(Supplier $supplier): View
     {
         return view('admin.suppliers.form', ['supplier' => $supplier]);
     }
 
-    public function update(Request $request, string $locale, Supplier $supplier): RedirectResponse
+    public function update(Request $request, Supplier $supplier): RedirectResponse
     {
         $supplier->update($this->validated($request, $supplier));
 

@@ -13,10 +13,15 @@ class SetLocaleFromUrl
 {
     public function handle(Request $request, Closure $next): Response
     {
+file_put_contents(
+    storage_path('logs/locale.log'),
+    now().' | '.$request->fullUrl().' | '.$request->route('locale').PHP_EOL,
+    FILE_APPEND
+);
         $locale = (string) $request->route('locale');
 
         if (! in_array($locale, ['th', 'en'], true)) {
-            return redirect('/th');
+            redirect('/th');
         }
 
         App::setLocale($locale);
@@ -31,7 +36,11 @@ class SetLocaleFromUrl
         }
 
         $alternateLocaleUrl = url(implode('/', $segments)).($request->getQueryString() ? '?'.$request->getQueryString() : '');
+session(['locale' => $locale]);
 
+config(['app.locale' => $locale]);
+
+app()->setLocale($locale);
         View::share('currentLocale', $locale);
         View::share('alternateLocale', $alternateLocale);
         View::share('alternateLocaleUrl', $alternateLocaleUrl);

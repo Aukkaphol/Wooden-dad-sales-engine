@@ -52,8 +52,8 @@
                     </h1>
                     <p class="mt-8 max-w-2xl text-lg font-medium leading-8 text-white/90 md:text-xl md:leading-9">{{ __('messages.hero.subtitle') }}</p>
                     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <a href="{{ route('lead.create') }}" class="inline-flex min-h-13 items-center justify-center rounded-full bg-white px-7 py-3.5 text-base font-semibold text-pine-800 shadow-[0_20px_55px_rgba(0,0,0,.20)] transition hover:bg-pine-50">{{ __('messages.hero.primary_cta') }}</a>
-                        <a href="{{ route('portfolio.index') }}" class="inline-flex min-h-13 items-center justify-center rounded-full border border-white/70 bg-white/10 px-7 py-3.5 text-base font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/18">{{ __('messages.hero.secondary_cta') }}</a>
+                        <a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}"<a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}" class="inline-flex min-h-13 items-center justify-center rounded-full bg-white px-7 py-3.5 text-base font-semibold text-pine-800 shadow-[0_20px_55px_rgba(0,0,0,.20)] transition hover:bg-pine-50">{{ __('messages.hero.primary_cta') }}</a>
+                        <a href="{{ route('portfolio.index', ['locale' => app()->getLocale()]) }}" class="inline-flex min-h-13 items-center justify-center rounded-full border border-white/70 bg-white/10 px-7 py-3.5 text-base font-semibold text-white shadow-sm backdrop-blur-md transition hover:bg-white/18">{{ __('messages.hero.secondary_cta') }}</a>
                     </div>
                     <div class="mt-8 grid max-w-xl grid-cols-3 gap-3 text-white">
                         @foreach ([['Custom', __('messages.hero.custom')], ['Pine', __('messages.hero.pine')], ['Install', __('messages.hero.install')]] as $item)
@@ -90,7 +90,7 @@
                         <p class="text-sm font-semibold text-pine-500">SHOW THE WORK</p>
                         <h2 class="mt-2 text-3xl font-semibold text-ink md:text-5xl">{{ __('messages.sections.show_work') }}</h2>
                     </div>
-                    <a href="{{ route('portfolio.index') }}" class="hidden rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-700 hover:bg-pine-50 sm:inline-flex">{{ __('messages.sections.show_all') }}</a>
+                    <a href="{{ route('portfolio.index', ['locale' => app()->getLocale()]) }}" class="hidden rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-700 hover:bg-pine-50 sm:inline-flex">{{ __('messages.sections.show_all') }}</a>
                 </div>
 
                 <div class="grid gap-5 lg:grid-cols-3">
@@ -147,7 +147,7 @@
                         <p class="text-sm font-semibold text-pine-500">CUSTOMER STORIES</p>
                         <h2 class="mt-2 text-3xl font-semibold text-ink md:text-5xl">{{ __('messages.sections.customer_reviews') }}</h2>
                     </div>
-                    <a href="{{ route('reviews.index') }}" class="hidden rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-700 hover:bg-pine-50 sm:inline-flex">{{ __('messages.sections.read_reviews') }}</a>
+                    <a href="{{ route('reviews.index', ['locale' => app()->getLocale()]) }}" class="hidden rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-700 hover:bg-pine-50 sm:inline-flex">{{ __('messages.sections.read_reviews') }}</a>
                 </div>
                 <div class="grid gap-5 md:grid-cols-2">
                     @forelse ($reviewItems as $review)
@@ -197,7 +197,7 @@
                     <p class="text-sm font-semibold text-pine-100">START YOUR CUSTOM PROJECT</p>
                     <h2 class="mt-3 text-4xl font-semibold leading-tight md:text-6xl">{{ __('messages.sections.final_cta') }}</h2>
                     <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                        <a href="{{ route('lead.create') }}" class="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 font-semibold text-pine-700 hover:bg-pine-50">{{ __('messages.hero.primary_cta') }}</a>
+                        <a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}" class="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3 font-semibold text-pine-700 hover:bg-pine-50">{{ __('messages.hero.primary_cta') }}</a>
                         @if ($company->line_oa_url)
                             <a href="{{ $company->line_oa_url }}" class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/60 px-6 py-3 font-semibold text-white hover:bg-white/10">{{ __('messages.sections.line_contact') }}</a>
                         @endif
@@ -209,8 +209,8 @@
 
         <div class="fixed inset-x-0 bottom-0 z-40 border-t border-pine-100 bg-white/95 p-3 shadow-[0_-10px_30px_rgba(93,66,39,.12)] backdrop-blur md:hidden">
             <div class="mx-auto flex max-w-[420px] gap-2">
-                <a href="{{ route('portfolio.index') }}" class="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-pine-50 px-4 text-sm font-semibold text-pine-700">{{ __('messages.hero.secondary_cta') }}</a>
-                <a href="{{ route('lead.create') }}" class="inline-flex min-h-12 flex-[1.35] items-center justify-center rounded-full bg-pine-700 px-4 text-sm font-semibold text-white">{{ __('messages.hero.primary_cta') }}</a>
+                <a href="{{ route('portfolio.index', ['locale' => app()->getLocale()]) }}" class="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-pine-50 px-4 text-sm font-semibold text-pine-700">{{ __('messages.hero.secondary_cta') }}</a>
+                <a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}" class="inline-flex min-h-12 flex-[1.35] items-center justify-center rounded-full bg-pine-700 px-4 text-sm font-semibold text-white">{{ __('messages.hero.primary_cta') }}</a>
             </div>
         </div>
     </div>

@@ -28,12 +28,12 @@ class AdminMaterialController extends Controller
         return redirect()->route('admin.materials.index')->with('success', 'สร้างวัสดุเรียบร้อยแล้ว');
     }
 
-    public function edit(string $locale, Material $material): View
+    public function edit(Material $material): View
     {
         return view('admin.materials.edit', compact('material'));
     }
 
-    public function update(Request $request, string $locale, Material $material): RedirectResponse
+    public function update(Request $request, Material $material): RedirectResponse
     {
         $material->update($this->validatedMaterial($request));
 

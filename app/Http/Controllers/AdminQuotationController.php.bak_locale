@@ -52,7 +52,7 @@ class AdminQuotationController extends Controller
         ]);
     }
 
-    public function createFromLead(string $locale, Lead $lead): View
+    public function createFromLead(Lead $lead): View
     {
         return view('admin.quotations.create', [
             'lead' => $lead,
@@ -62,7 +62,7 @@ class AdminQuotationController extends Controller
         ]);
     }
 
-    public function store(Request $request, string $locale, ?Lead $lead = null): RedirectResponse
+    public function store(Request $request, ?Lead $lead = null): RedirectResponse
     {
         $lead = $lead ?: Lead::findOrFail($request->integer('lead_id'));
         $validated = $this->validateQuotation($request);
@@ -111,7 +111,7 @@ class AdminQuotationController extends Controller
             ->with('success', 'สร้างใบเสนอราคาเรียบร้อยแล้ว');
     }
 
-    public function show(string $locale, Quotation $quotation, CostCalculationService $costCalculationService): View
+    public function show(Quotation $quotation, CostCalculationService $costCalculationService): View
     {
         $quotation->load(['lead', 'items', 'productionOrder']);
 
@@ -122,7 +122,7 @@ class AdminQuotationController extends Controller
         ]);
     }
 
-    public function edit(string $locale, Quotation $quotation): View
+    public function edit(Quotation $quotation): View
     {
         $quotation->load(['lead', 'items']);
 
@@ -134,7 +134,7 @@ class AdminQuotationController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $locale, Quotation $quotation): RedirectResponse
+    public function update(Request $request, Quotation $quotation): RedirectResponse
     {
         $validated = $this->validateQuotation($request);
         $wasApproved = $quotation->status === 'approved';
@@ -177,7 +177,7 @@ class AdminQuotationController extends Controller
             ->with('success', 'อัปเดตใบเสนอราคาเรียบร้อยแล้ว');
     }
 
-    public function updateStatus(Request $request, string $locale, Quotation $quotation): RedirectResponse
+    public function updateStatus(Request $request, Quotation $quotation): RedirectResponse
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:'.implode(',', array_keys(Quotation::STATUSES))],
@@ -206,7 +206,7 @@ class AdminQuotationController extends Controller
         return back()->with('success', 'อัปเดตสถานะใบเสนอราคาเรียบร้อยแล้ว');
     }
 
-    public function approve(string $locale, Quotation $quotation): RedirectResponse
+    public function approve(Quotation $quotation): RedirectResponse
     {
         $wasApproved = $quotation->status === 'approved';
 
@@ -227,7 +227,7 @@ class AdminQuotationController extends Controller
         return back()->with('success', 'อนุมัติใบเสนอราคาและสร้างใบสั่งผลิตเรียบร้อยแล้ว');
     }
 
-    public function destroy(string $locale, Quotation $quotation): RedirectResponse
+    public function destroy(Quotation $quotation): RedirectResponse
     {
         $quotation->delete();
 
@@ -236,7 +236,7 @@ class AdminQuotationController extends Controller
             ->with('success', 'ลบใบเสนอราคาเรียบร้อยแล้ว');
     }
 
-    public function pdf(string $locale, Quotation $quotation, QuotationPdfService $pdfService): Response
+    public function pdf(Quotation $quotation, QuotationPdfService $pdfService): Response
     {
         $pdf = $pdfService->render($quotation);
 

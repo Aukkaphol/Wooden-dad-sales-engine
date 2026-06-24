@@ -42,7 +42,7 @@ class AdminCustomerReviewController extends Controller
         return back()->with('success', 'เพิ่มรีวิวลูกค้าเรียบร้อยแล้ว');
     }
 
-    public function update(Request $request, string $locale, CustomerReview $review): RedirectResponse
+    public function update(Request $request, CustomerReview $review): RedirectResponse
     {
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
@@ -74,7 +74,7 @@ class AdminCustomerReviewController extends Controller
         return back()->with('success', 'อัปเดตรีวิวลูกค้าเรียบร้อยแล้ว');
     }
 
-    public function destroy(string $locale, CustomerReview $review): RedirectResponse
+    public function destroy(CustomerReview $review): RedirectResponse
     {
         if ($review->image_path) {
             Storage::disk('public')->delete($review->image_path);

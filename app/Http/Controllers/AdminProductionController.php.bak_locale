@@ -31,7 +31,7 @@ class AdminProductionController extends Controller
         ]);
     }
 
-    public function show(string $locale, ProductionOrder $productionOrder, CostCalculationService $costCalculationService, PurchaseService $purchaseService): View
+    public function show(ProductionOrder $productionOrder, CostCalculationService $costCalculationService, PurchaseService $purchaseService): View
     {
         $productionOrder->load(['lead', 'quotation.items', 'craftsmen']);
         $inventoryService = app(InventoryService::class);
@@ -46,7 +46,7 @@ class AdminProductionController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, string $locale, ProductionOrder $productionOrder, InventoryService $inventoryService, LineNotificationService $lineNotificationService): RedirectResponse|JsonResponse
+    public function updateStatus(Request $request, ProductionOrder $productionOrder, InventoryService $inventoryService, LineNotificationService $lineNotificationService): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:'.implode(',', array_keys(ProductionOrder::STATUSES))],
@@ -124,7 +124,7 @@ class AdminProductionController extends Controller
         return back()->with('success', 'เธญเธฑเธเน€เธ”เธ•เธชเธ–เธฒเธเธฐเธเธฒเธเธเธฅเธดเธ•เน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง');
     }
 
-    public function assignCraftsmen(Request $request, string $locale, ProductionOrder $productionOrder, LineNotificationService $lineNotificationService): RedirectResponse
+    public function assignCraftsmen(Request $request, ProductionOrder $productionOrder, LineNotificationService $lineNotificationService): RedirectResponse
     {
         $validated = $request->validate([
             'craftsman_ids' => ['nullable', 'array'],

@@ -41,10 +41,10 @@
         ];
     @endphp
 
-    <header class="fixed inset-x-0 top-0 z-50 px-4 pt-4">
+    <header class="fixed inset-x-0 top-0 z-[9999] px-4 pt-4 pointer-events-auto">
         <nav class="mx-auto max-w-7xl rounded-[28px] border border-white/60 bg-white/78 px-4 py-3 shadow-[0_18px_55px_rgba(93,66,39,.14)] backdrop-blur-2xl md:px-5">
             <div class="flex items-center justify-between gap-4">
-                <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3" aria-label="{{ $company->display_name }}">
+                <a href="{{ route('home', ['locale' => app()->getLocale()]) }}" class="flex min-w-0 items-center gap-3" aria-label="{{ $company->display_name }}">
                     @if ($company->logo_url)
                         <img src="{{ $company->logo_url }}" alt="{{ $company->display_name }}" class="h-10 w-10 shrink-0 rounded-full bg-white object-contain shadow-[0_10px_24px_rgba(93,66,39,.20)]">
                     @else
@@ -58,7 +58,9 @@
 
                 <div class="hidden items-center gap-7 text-sm font-semibold text-[#4f3f2f] lg:flex">
                     @foreach ($publicMenu as $item)
-                        <a href="{{ route($item['route']) }}" class="hover:text-pine-700">{{ $item['label'] }}</a>
+                        <a href="{{ route($item['route'], ['locale' => app()->getLocale()]) }}" class="hover:text-pine-700">
+    {{ $item['label'] }}</a>
+
                     @endforeach
                 </div>
 
@@ -67,7 +69,7 @@
                         <a href="{{ $localizedPath('th') }}" class="rounded-full px-2.5 py-1 {{ $currentLocale === 'th' ? 'bg-white text-ink shadow-sm' : '' }}">{{ __('messages.language.th') }}</a>
                         <a href="{{ $localizedPath('en') }}" class="rounded-full px-2.5 py-1 {{ $currentLocale === 'en' ? 'bg-white text-ink shadow-sm' : '' }}">{{ __('messages.language.en') }}</a>
                     </div>
-                    <a href="{{ route('lead.create') }}" class="hidden min-h-11 items-center justify-center rounded-full bg-pine-700 px-5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(93,66,39,.22)] transition hover:bg-pine-500 sm:inline-flex">{{ __('messages.nav.request_quotation') }}</a>
+                    <a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}" class="hidden min-h-11 items-center justify-center rounded-full bg-pine-700 px-5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(93,66,39,.22)] transition hover:bg-pine-500 sm:inline-flex">{{ __('messages.nav.request_quotation') }}</a>
                     <details class="group relative lg:hidden">
                         <summary class="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-pine-200 bg-white text-pine-800 shadow-sm marker:hidden" aria-label="Open menu">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-open:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -79,13 +81,13 @@
                         </summary>
                         <div class="absolute right-0 top-14 w-[min(82vw,320px)] rounded-[22px] border border-pine-100 bg-white p-3 text-base font-semibold text-[#4f3f2f] shadow-[0_24px_70px_rgba(28,23,18,.20)]">
                             @foreach ($publicMenu as $item)
-                                <a href="{{ route($item['route']) }}" class="block rounded-2xl px-3 py-3 hover:bg-pine-50">{{ $item['label'] }}</a>
+                                <a href="{{ route($item['route'], ['locale' => app()->getLocale()]) }}" class="hover:text-pine-700">{{ $item['label'] }}</a>
                             @endforeach
                             <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                                 <a href="{{ $localizedPath('th') }}" class="rounded-2xl px-3 py-3 text-center {{ $currentLocale === 'th' ? 'bg-pine-100 text-ink' : 'bg-pine-50 text-pine-700' }}">{{ __('messages.language.th') }}</a>
                                 <a href="{{ $localizedPath('en') }}" class="rounded-2xl px-3 py-3 text-center {{ $currentLocale === 'en' ? 'bg-pine-100 text-ink' : 'bg-pine-50 text-pine-700' }}">{{ __('messages.language.en') }}</a>
                             </div>
-                            <a href="{{ route('lead.create') }}" class="mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-pine-700 px-5 text-center text-sm font-semibold text-white shadow-sm">{{ __('messages.nav.request_quotation') }}</a>
+                            <a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}" class="mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-pine-700 px-5 text-center text-sm font-semibold text-white shadow-sm">{{ __('messages.nav.request_quotation') }}</a>
                         </div>
                     </details>
                 </div>
@@ -132,11 +134,16 @@
             <div>
                 <p class="font-semibold text-ink">{{ __('messages.footer.menu') }}</p>
                 <div class="mt-2 grid gap-1">
-                    @foreach ($publicMenu as $item)
-                        <a href="{{ route($item['route']) }}" class="hover:text-ink">{{ $item['label'] }}</a>
-                    @endforeach
-                    <a href="{{ route('lead.create') }}" class="hover:text-ink">{{ __('messages.nav.request_quotation') }}</a>
-                </div>
+    @foreach ($publicMenu as $item)
+        <a href="{{ route($item['route'], ['locale' => app()->getLocale()]) }}" class="hover:text-ink">
+            {{ $item['label'] }}
+        </a>
+    @endforeach
+
+    <a href="{{ route('lead.create', ['locale' => app()->getLocale()]) }}" class="hover:text-ink">
+        {{ __('messages.nav.request_quotation') }}
+    </a>
+</div>
             </div>
         </div>
     </footer>

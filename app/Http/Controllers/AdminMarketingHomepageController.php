@@ -25,7 +25,7 @@ class AdminMarketingHomepageController extends Controller
         ]);
     }
 
-    public function updateSection(Request $request, WebsiteSection $section): RedirectResponse
+    public function updateSection(Request $request,string $locale, WebsiteSection $section): RedirectResponse
     {
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
@@ -57,7 +57,7 @@ class AdminMarketingHomepageController extends Controller
         return back()->with('success', 'บันทึกส่วนหน้าแรกเรียบร้อยแล้ว');
     }
 
-    public function updateCategory(Request $request, FurnitureSetCategory $category): RedirectResponse
+    public function updateCategory(Request $request,string $locale, FurnitureSetCategory $category): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],

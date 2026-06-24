@@ -1,5 +1,13 @@
 <?php
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
+Route::post('/webhooks/line', function (Request $request) {
+    Log::info('LINE webhook payload', $request->all());
+    return response('OK', 200);
+})->withoutMiddleware([
+    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+]);
 use App\Http\Controllers\AdminCompanySettingController;
 use App\Http\Controllers\AdminCustomerReviewController;
 use App\Http\Controllers\AdminDashboardController;
@@ -55,8 +63,8 @@ Route::get('/webhooks/facebook', [FacebookWebhookController::class, 'verify'])->
 Route::post('/webhooks/facebook', [FacebookWebhookController::class, 'receive'])->name('webhooks.facebook.receive');
 
 Route::prefix('{locale}')
-    ->where(['locale' => '[A-Za-z]{2}'])
-    ->middleware(SetLocaleFromUrl::class)
+    ->where(['locale' => 'th|en'])
+    ->middleware('setlocale')
     ->group(function (): void {
         Route::get('/', HomeController::class)->name('home');
         Route::view('/bedroom-set', 'bedroom-set')->name('bedroom-set');
@@ -156,8 +164,10 @@ Route::prefix('{locale}')
         });
     });
 
-Route::redirect('/{locale}', '/th')->where('locale', '^(?!(th|en|api|line|facebook|webhooks)$).+');
-Route::redirect('/{locale}/{any}', '/th')->where([
-    'locale' => '^(?!(th|en|api|line|facebook|webhooks)$).+',
-    'any' => '.*',
-]);
+
+Route::redirect('/{any}', '/th')->where('any', '^(?!(th|en|api|line|facebook|webhooks)$).+');
+    
+Route::post('/webhooks/line', function (\Illuminate\Http\Request $request) {
+    \Log::info('LINE webhook payload', $request->all());
+    return response('OK', 200);
+});

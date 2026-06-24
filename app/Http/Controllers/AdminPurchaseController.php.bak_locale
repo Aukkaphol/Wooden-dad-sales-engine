@@ -154,14 +154,14 @@ class AdminPurchaseController extends Controller
         return redirect()->route('admin.purchase.po.show', $po)->with('success', 'สร้างใบสั่งซื้อเรียบร้อยแล้ว');
     }
 
-    public function showPo(string $locale, PurchaseOrder $purchaseOrder): View
+    public function showPo(PurchaseOrder $purchaseOrder): View
     {
         $purchaseOrder->load(['supplier', 'purchaseRequisition', 'items.material', 'receipts.material']);
 
         return view('admin.purchase.po-show', ['po' => $purchaseOrder]);
     }
 
-    public function receive(Request $request, string $locale, PurchaseOrderItem $purchaseOrderItem, PurchaseService $purchaseService): RedirectResponse
+    public function receive(Request $request, PurchaseOrderItem $purchaseOrderItem, PurchaseService $purchaseService): RedirectResponse
     {
         $validated = $request->validate([
             'receive_date' => ['required', 'date'],
@@ -173,7 +173,7 @@ class AdminPurchaseController extends Controller
         return back()->with('success', 'รับวัตถุดิบเข้าคลังเรียบร้อยแล้ว');
     }
 
-    public function autoPrFromLowStock(string $locale, Material $material, PurchaseService $purchaseService): RedirectResponse
+    public function autoPrFromLowStock(Material $material, PurchaseService $purchaseService): RedirectResponse
     {
         $suggested = max(0, (float) $material->low_stock_level - (float) $material->current_stock);
         if ($suggested <= 0) {
@@ -197,7 +197,7 @@ class AdminPurchaseController extends Controller
         return redirect()->route('admin.purchase.pr.show', $pr)->with('success', 'สร้าง PR อัตโนมัติจาก Low Stock แล้ว');
     }
 
-    public function autoPrFromProduction(string $locale, ProductionOrder $productionOrder, PurchaseService $purchaseService): RedirectResponse
+    public function autoPrFromProduction(ProductionOrder $productionOrder, PurchaseService $purchaseService): RedirectResponse
     {
         $pr = $purchaseService->createPrFromProduction($productionOrder);
 
