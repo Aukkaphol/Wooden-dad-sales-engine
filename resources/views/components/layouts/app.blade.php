@@ -52,6 +52,7 @@
                                 <a href="{{ route('workspaces.analytics.index', $navWorkspace) }}" class="transition hover:text-white">Analytics</a>
                                 <a href="{{ route('workspaces.pipeline.index', $navWorkspace) }}" class="transition hover:text-white">Pipeline</a>
                                 <a href="{{ route('workspaces.director.show', $navWorkspace) }}" class="transition hover:text-white">Director</a>
+                                <a href="{{ route('channels.facebook.index') }}" class="transition hover:text-white">Channels</a>
                             @endif
                             <span>{{ auth()->user()->name }}</span>
                             <form method="POST" action="{{ route('logout') }}">

@@ -9,6 +9,7 @@ use App\Http\Controllers\AiDirectorController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ContentApprovalController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FacebookIntegrationController;
 use App\Http\Controllers\GeneratedContentController;
 use App\Http\Controllers\MediaPipelineController;
 use App\Http\Controllers\PromptTemplateController;
@@ -34,6 +35,18 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/integrations/facebook', [FacebookIntegrationController::class, 'index'])->name('integrations.facebook.index');
+    Route::get('/integrations/facebook/connect', [FacebookIntegrationController::class, 'connect'])->name('integrations.facebook.connect');
+    Route::get('/integrations/facebook/callback', [FacebookIntegrationController::class, 'callback'])->name('integrations.facebook.callback');
+    Route::post('/integrations/facebook/pages/{connection}/publish-test', [FacebookIntegrationController::class, 'publishTest'])->name('integrations.facebook.publish-test');
+    Route::post('/integrations/facebook/pages/{connection}/test', [FacebookIntegrationController::class, 'testConnection'])->name('integrations.facebook.test');
+    Route::post('/integrations/facebook/pages/{connection}/sync', [FacebookIntegrationController::class, 'sync'])->name('integrations.facebook.sync');
+    Route::get('/channels/facebook', [FacebookIntegrationController::class, 'index'])->name('channels.facebook.index');
+    Route::get('/channels/facebook/connect', [FacebookIntegrationController::class, 'connect'])->name('channels.facebook.connect');
+    Route::get('/channels/facebook/callback', [FacebookIntegrationController::class, 'callback'])->name('channels.facebook.callback');
+    Route::post('/channels/facebook/{connection}/publish-test', [FacebookIntegrationController::class, 'publishTest'])->name('channels.facebook.publish-test');
+    Route::post('/channels/facebook/{connection}/test', [FacebookIntegrationController::class, 'testConnection'])->name('channels.facebook.test');
+    Route::post('/channels/facebook/{connection}/sync', [FacebookIntegrationController::class, 'sync'])->name('channels.facebook.sync');
 
     Route::resource('workspaces', WorkspaceController::class);
     Route::post('/workspaces/{workspace}/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
