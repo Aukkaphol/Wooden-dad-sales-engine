@@ -92,7 +92,7 @@ class FacebookIntegrationTest extends TestCase
                         'followers_count' => 1200,
                         'verification_status' => 'not_verified',
                         'picture' => ['data' => ['url' => 'https://example.test/page.jpg']],
-                        'perms' => ['pages_manage_posts', 'pages_read_engagement'],
+                        'tasks' => ['CREATE_CONTENT', 'MODERATE'],
                     ],
                 ],
             ]),
@@ -126,7 +126,7 @@ class FacebookIntegrationTest extends TestCase
         $this->assertSame(FacebookConnection::CONNECTION_ACTIVE, $connection->connection_status);
         $this->assertNotNull($connection->last_synced_at);
         $this->assertNotSame('page-access-token', $rawToken);
-        $this->assertSame(['pages_manage_posts', 'pages_read_engagement'], $connection->permissions);
+        $this->assertSame(['CREATE_CONTENT', 'MODERATE'], $connection->permissions);
         $this->assertDatabaseHas('facebook_logs', [
             'facebook_connection_id' => $connection->getKey(),
             'action' => 'connect_success',

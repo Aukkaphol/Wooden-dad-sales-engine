@@ -72,7 +72,7 @@ class FacebookConnectorService
                         'page_likes_count' => $page['fan_count'] ?? null,
                         'page_verification_status' => $page['verification_status'] ?? null,
                         'token_expires_at' => $expiresAt,
-                        'permissions' => $page['perms'] ?? $page['tasks'] ?? null,
+                        'permissions' => $page['tasks'] ?? null,
                         'status' => FacebookConnection::STATUS_ACTIVE,
                         'connection_status' => FacebookConnection::CONNECTION_ACTIVE,
                         'last_synced_at' => now(),
@@ -256,7 +256,7 @@ class FacebookConnectorService
     private function fetchManagedPages(string $userAccessToken): array
     {
         $response = Http::get($this->graphUrl('/me/accounts'), [
-            'fields' => 'id,name,access_token,category,fan_count,followers_count,picture,verification_status,perms,tasks',
+            'fields' => 'id,name,access_token,category,fan_count,followers_count,picture,verification_status,tasks',
             'access_token' => $userAccessToken,
         ])->throw()->json();
 
