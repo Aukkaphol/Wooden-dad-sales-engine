@@ -16,6 +16,8 @@ class WorkspaceUser extends Model
 
     public const ROLE_OWNER = 'owner';
     public const ROLE_ADMIN = 'admin';
+    public const ROLE_EDITOR = 'editor';
+    public const ROLE_VIEWER = 'viewer';
     public const ROLE_MEMBER = 'member';
     public const ROLE_MARKETING_MANAGER = 'marketing_manager';
     public const ROLE_CONTENT_CREATOR = 'content_creator';
@@ -24,10 +26,19 @@ class WorkspaceUser extends Model
     public const ROLES = [
         self::ROLE_OWNER,
         self::ROLE_ADMIN,
+        self::ROLE_EDITOR,
+        self::ROLE_VIEWER,
         self::ROLE_MEMBER,
         self::ROLE_MARKETING_MANAGER,
         self::ROLE_CONTENT_CREATOR,
         self::ROLE_REVIEWER,
+    ];
+
+    public const ADMIN_ASSIGNABLE_ROLES = [
+        self::ROLE_OWNER,
+        self::ROLE_ADMIN,
+        self::ROLE_EDITOR,
+        self::ROLE_VIEWER,
     ];
 
     protected $table = 'workspace_users';

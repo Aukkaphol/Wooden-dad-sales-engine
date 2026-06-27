@@ -44,6 +44,9 @@
 
                             <a href="{{ route('dashboard') }}" class="transition hover:text-white">Dashboard</a>
                             <a href="{{ route('workspaces.index') }}" class="transition hover:text-white">Workspaces</a>
+                            @if (auth()->user()->ownedWorkspaces()->exists())
+                                <a href="{{ route('admin.workspaces.index') }}" class="transition hover:text-white">Admin</a>
+                            @endif
                             @if ($navWorkspace)
                                 <a href="{{ route('workspaces.assets.index', $navWorkspace) }}" class="transition hover:text-white">Assets</a>
                                 <a href="{{ route('workspaces.prompts.index', $navWorkspace) }}" class="transition hover:text-white">Prompts</a>

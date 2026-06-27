@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\AdminWorkspaceController;
 use App\Http\Controllers\AiInsightController;
 use App\Http\Controllers\AnalyticsRecordController;
 use App\Http\Controllers\AssetController;
@@ -35,6 +36,13 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/admin/workspaces', [AdminWorkspaceController::class, 'index'])->name('admin.workspaces.index');
+    Route::get('/admin/workspaces/{workspace}/members', [AdminWorkspaceController::class, 'members'])->name('admin.workspaces.members');
+    Route::post('/admin/workspaces/{workspace}/members', [AdminWorkspaceController::class, 'storeMember'])->name('admin.workspaces.members.store');
+    Route::put('/admin/workspaces/{workspace}/members/{user}', [AdminWorkspaceController::class, 'updateMember'])->name('admin.workspaces.members.update');
+    Route::delete('/admin/workspaces/{workspace}/members/{user}', [AdminWorkspaceController::class, 'destroyMember'])->name('admin.workspaces.members.destroy');
+    Route::get('/admin/users/no-workspace', [AdminWorkspaceController::class, 'usersWithoutWorkspace'])->name('admin.users.no-workspace');
+    Route::post('/admin/users/{user}/assign-workspace', [AdminWorkspaceController::class, 'assignUser'])->name('admin.users.assign-workspace');
     Route::get('/integrations/facebook', [FacebookIntegrationController::class, 'index'])->name('integrations.facebook.index');
     Route::get('/integrations/facebook/connect', [FacebookIntegrationController::class, 'connect'])->name('integrations.facebook.connect');
     Route::get('/integrations/facebook/callback', [FacebookIntegrationController::class, 'callback'])->name('integrations.facebook.callback');
