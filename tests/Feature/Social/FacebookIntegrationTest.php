@@ -3,6 +3,7 @@
 namespace Tests\Feature\Social;
 
 use App\Models\FacebookConnection;
+use App\Models\FacebookIntegrationSetting;
 use App\Models\FacebookLog;
 use App\Models\User;
 use App\Models\Workspace;
@@ -21,6 +22,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_channel_page_renders_for_current_workspace(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
+        $this->facebookConfig($workspace);
 
         FacebookConnection::query()->create([
             'workspace_id' => $workspace->getKey(),
@@ -36,6 +38,8 @@ class FacebookIntegrationTest extends TestCase
             ->get(route('channels.facebook.index'))
             ->assertOk()
             ->assertSee('Facebook Channel')
+            ->assertSee('Facebook App Settings')
+            ->assertSee('facebook-app-id')
             ->assertSee('Wooden Dad Design')
             ->assertSee('Connected as Aukkaphol')
             ->assertSee('Test Connection')
@@ -44,8 +48,8 @@ class FacebookIntegrationTest extends TestCase
 
     public function test_connect_redirects_to_meta_oauth_with_required_permissions(): void
     {
-        [$user] = $this->workspaceFixture();
-        $this->facebookConfig();
+        [$user, $workspace] = $this->workspaceFixture();
+        $this->facebookConfig($workspace);
 
         $response = $this->actingAs($user)->get(route('channels.facebook.connect'));
 
@@ -54,6 +58,7 @@ class FacebookIntegrationTest extends TestCase
 
         $this->assertStringContainsString('https://www.facebook.com/v23.0/dialog/oauth', $location);
         $this->assertStringContainsString('client_id=facebook-app-id', $location);
+        $this->assertStringContainsString('redirect_uri=https%3A%2F%2Fstudio.test%2Fchannels%2Ffacebook%2Fcallback', $location);
         $this->assertStringContainsString('pages_show_list%2Cpages_read_engagement%2Cpages_manage_posts%2Cbusiness_management', $location);
         $this->assertDatabaseHas('facebook_logs', [
             'workspace_id' => $user->current_workspace_id,
@@ -65,7 +70,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_callback_exchanges_code_fetches_pages_and_stores_encrypted_page_token(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
 
         Http::fake([
             'graph.facebook.com/v23.0/oauth/access_token*' => Http::sequence()
@@ -132,7 +137,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_token_exchange_failure_logs_connect_failed_without_raw_token(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
 
         Http::fake([
             'graph.facebook.com/v23.0/oauth/access_token*' => Http::sequence()
@@ -166,7 +171,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_service_publishes_text_post_to_connected_page(): void
     {
         [, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
 
         $connection = FacebookConnection::query()->create([
             'workspace_id' => $workspace->getKey(),
@@ -193,10 +198,61 @@ class FacebookIntegrationTest extends TestCase
         ]);
     }
 
+    public function test_workspace_facebook_settings_are_saved_encrypted_and_isolated(): void
+    {
+        [$user, $workspace] = $this->workspaceFixture();
+        $otherWorkspace = Workspace::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('channels.facebook.settings'), [
+                'app_id' => 'workspace-app-id',
+                'app_secret' => 'workspace-secret',
+                'redirect_uri' => 'https://workspace.test/channels/facebook/callback',
+            ])
+            ->assertRedirect();
+
+        $setting = FacebookIntegrationSetting::query()->where('workspace_id', $workspace->getKey())->firstOrFail();
+        $rawSecret = DB::table('facebook_integration_settings')->whereKey($setting->getKey())->value('app_secret');
+
+        $this->assertSame('workspace-app-id', $setting->app_id);
+        $this->assertSame('workspace-secret', $setting->app_secret);
+        $this->assertNotSame('workspace-secret', $rawSecret);
+        $this->assertDatabaseMissing('facebook_integration_settings', [
+            'workspace_id' => $otherWorkspace->getKey(),
+            'app_id' => 'workspace-app-id',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('channels.facebook.index'))
+            ->assertOk()
+            ->assertSee('workspace-app-id')
+            ->assertDontSee('workspace-secret');
+    }
+
+    public function test_existing_workspace_secret_is_preserved_when_update_leaves_secret_blank(): void
+    {
+        [$user, $workspace] = $this->workspaceFixture();
+        $this->facebookConfig($workspace);
+
+        $this->actingAs($user)
+            ->post(route('channels.facebook.settings'), [
+                'app_id' => 'updated-app-id',
+                'app_secret' => '',
+                'redirect_uri' => 'https://updated.test/channels/facebook/callback',
+            ])
+            ->assertRedirect();
+
+        $setting = FacebookIntegrationSetting::query()->where('workspace_id', $workspace->getKey())->firstOrFail();
+
+        $this->assertSame('updated-app-id', $setting->app_id);
+        $this->assertSame('facebook-app-secret', $setting->app_secret);
+        $this->assertSame('https://updated.test/channels/facebook/callback', $setting->redirect_uri);
+    }
+
     public function test_test_connection_success_updates_status_and_creates_log(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
         $connection = $this->connection($workspace, [
             'connection_status' => FacebookConnection::CONNECTION_NEEDS_REFRESH,
             'last_error' => 'Previous error',
@@ -227,7 +283,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_test_connection_failure_updates_status_error_and_creates_log(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
         $connection = $this->connection($workspace);
 
         Http::fake([
@@ -253,7 +309,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_sync_page_info_success_updates_metadata_and_creates_log(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
         $connection = $this->connection($workspace);
 
         Http::fake([
@@ -290,7 +346,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_sync_page_info_failure_updates_status_error_and_creates_log(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
         $connection = $this->connection($workspace);
 
         Http::fake([
@@ -316,7 +372,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_publish_test_route_success_uses_fixed_message_and_creates_log(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
         $connection = $this->connection($workspace);
 
         Http::fake([
@@ -340,7 +396,7 @@ class FacebookIntegrationTest extends TestCase
     public function test_publish_test_route_failure_updates_status_error_and_creates_log(): void
     {
         [$user, $workspace] = $this->workspaceFixture();
-        $this->facebookConfig();
+        $this->facebookConfig($workspace);
         $connection = $this->connection($workspace);
 
         Http::fake([
@@ -424,14 +480,20 @@ class FacebookIntegrationTest extends TestCase
         return [$user->refresh(), $workspace->refresh()];
     }
 
-    private function facebookConfig(): void
+    private function facebookConfig(?Workspace $workspace = null): void
     {
         config([
-            'services.facebook.app_id' => 'facebook-app-id',
-            'services.facebook.app_secret' => 'facebook-app-secret',
-            'services.facebook.redirect_uri' => 'https://studio.test/channels/facebook/callback',
             'services.facebook.graph_version' => 'v23.0',
         ]);
+
+        if ($workspace) {
+            FacebookIntegrationSetting::query()->create([
+                'workspace_id' => $workspace->getKey(),
+                'app_id' => 'facebook-app-id',
+                'app_secret' => 'facebook-app-secret',
+                'redirect_uri' => 'https://studio.test/channels/facebook/callback',
+            ]);
+        }
     }
 
     private function connection(Workspace $workspace, array $overrides = []): FacebookConnection

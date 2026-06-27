@@ -11,6 +11,40 @@
             </a>
         </div>
 
+        <form method="POST" action="{{ route('channels.facebook.settings') }}" class="mt-8 rounded-lg border border-white/10 bg-white/[0.03] p-5">
+            @csrf
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-white">Facebook App Settings</h2>
+                    <p class="mt-1 text-sm text-zinc-400">Saved per workspace. The App Secret is encrypted and never displayed after saving.</p>
+                </div>
+                @if ($settings)
+                    <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">Configured</span>
+                @else
+                    <span class="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-200">Setup required</span>
+                @endif
+            </div>
+
+            <div class="mt-5 grid gap-4 lg:grid-cols-3">
+                <div>
+                    <label for="app_id" class="text-sm font-medium text-zinc-200">Facebook App ID</label>
+                    <input id="app_id" name="app_id" value="{{ old('app_id', $settings?->app_id) }}" class="mt-2 w-full rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-300">
+                </div>
+                <div>
+                    <label for="app_secret" class="text-sm font-medium text-zinc-200">Facebook App Secret</label>
+                    <input id="app_secret" name="app_secret" type="password" autocomplete="new-password" placeholder="{{ $settings ? 'Leave blank to keep saved secret' : '' }}" class="mt-2 w-full rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-300">
+                </div>
+                <div>
+                    <label for="redirect_uri" class="text-sm font-medium text-zinc-200">Redirect URI</label>
+                    <input id="redirect_uri" name="redirect_uri" value="{{ old('redirect_uri', $settings?->redirect_uri ?? route('channels.facebook.callback')) }}" class="mt-2 w-full rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none transition focus:border-cyan-300">
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button class="rounded-md border border-cyan-300/40 px-4 py-2 text-sm font-medium text-cyan-100 hover:bg-cyan-400/10">Save Facebook Settings</button>
+            </div>
+        </form>
+
         <div class="mt-8 grid gap-5">
             @forelse ($connections as $connection)
                 @php
@@ -102,7 +136,7 @@
             @empty
                 <div class="rounded-lg border border-white/10 bg-white/[0.03] p-8 text-center">
                     <h2 class="text-xl font-semibold text-white">No Facebook Pages connected</h2>
-                    <p class="mt-2 text-zinc-400">Connect Facebook to save Page access tokens for this workspace.</p>
+                    <p class="mt-2 text-zinc-400">Save Facebook App settings, then connect Facebook to save Page access tokens for this workspace.</p>
                     <a href="{{ route('channels.facebook.connect') }}" class="mt-5 inline-flex rounded-md bg-cyan-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-cyan-300">
                         Connect Facebook
                     </a>

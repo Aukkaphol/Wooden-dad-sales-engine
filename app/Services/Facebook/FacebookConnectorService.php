@@ -3,6 +3,7 @@
 namespace App\Services\Facebook;
 
 use App\Models\FacebookConnection;
+use App\Models\FacebookIntegrationSetting;
 use App\Models\FacebookLog;
 use App\Models\Workspace;
 use Illuminate\Http\Client\RequestException;
@@ -23,12 +24,12 @@ class FacebookConnectorService
 
     public function authorizationUrl(Workspace $workspace, string $state): string
     {
-        $this->validateConfiguration();
+        $settings = $this->settingsFor($workspace);
         $this->log($workspace, null, 'connect_started', FacebookLog::STATUS_STARTED, 'Facebook OAuth connection started.');
 
         return 'https://www.facebook.com/'.$this->graphVersion().'/dialog/oauth?'.http_build_query([
-            'client_id' => config('services.facebook.app_id'),
-            'redirect_uri' => $this->redirectUri(),
+            'client_id' => $settings->app_id,
+            'redirect_uri' => $settings->redirect_uri,
             'state' => $state,
             'scope' => implode(',', self::PERMISSIONS),
             'response_type' => 'code',
@@ -43,8 +44,9 @@ class FacebookConnectorService
     public function storePagesFromCallback(Workspace $workspace, string $code): Collection
     {
         try {
-            $shortLivedTokenPayload = $this->exchangeCodeForUserToken($code);
-            $longLivedTokenPayload = $this->exchangeForLongLivedUserToken($shortLivedTokenPayload['access_token']);
+            $settings = $this->settingsFor($workspace);
+            $shortLivedTokenPayload = $this->exchangeCodeForUserToken($settings, $code);
+            $longLivedTokenPayload = $this->exchangeForLongLivedUserToken($settings, $shortLivedTokenPayload['access_token']);
             $userAccessToken = $longLivedTokenPayload['access_token'];
             $userProfile = $this->fetchUserProfile($userAccessToken);
             $pages = $this->fetchManagedPages($userAccessToken);
@@ -221,14 +223,12 @@ class FacebookConnectorService
      *
      * @throws RequestException
      */
-    private function exchangeCodeForUserToken(string $code): array
+    private function exchangeCodeForUserToken(FacebookIntegrationSetting $settings, string $code): array
     {
-        $this->validateConfiguration();
-
         return Http::get($this->graphUrl('/oauth/access_token'), [
-            'client_id' => config('services.facebook.app_id'),
-            'client_secret' => config('services.facebook.app_secret'),
-            'redirect_uri' => $this->redirectUri(),
+            'client_id' => $settings->app_id,
+            'client_secret' => $settings->app_secret,
+            'redirect_uri' => $settings->redirect_uri,
             'code' => $code,
         ])->throw()->json();
     }
@@ -238,14 +238,12 @@ class FacebookConnectorService
      *
      * @throws RequestException
      */
-    private function exchangeForLongLivedUserToken(string $shortLivedUserAccessToken): array
+    private function exchangeForLongLivedUserToken(FacebookIntegrationSetting $settings, string $shortLivedUserAccessToken): array
     {
-        $this->validateConfiguration();
-
         return Http::get($this->graphUrl('/oauth/access_token'), [
             'grant_type' => 'fb_exchange_token',
-            'client_id' => config('services.facebook.app_id'),
-            'client_secret' => config('services.facebook.app_secret'),
+            'client_id' => $settings->app_id,
+            'client_secret' => $settings->app_secret,
             'fb_exchange_token' => $shortLivedUserAccessToken,
         ])->throw()->json();
     }
@@ -311,19 +309,25 @@ class FacebookConnectorService
         return 'Facebook Graph API request failed with status '.$exception->response?->status().'.';
     }
 
-    private function validateConfiguration(): void
+    private function settingsFor(Workspace $workspace): FacebookIntegrationSetting
     {
-        Validator::make(config('services.facebook'), [
+        $settings = FacebookIntegrationSetting::query()
+            ->where('workspace_id', $workspace->getKey())
+            ->first();
+
+        if (! $settings) {
+            throw ValidationException::withMessages([
+                'facebook_settings' => 'Save Facebook App settings before connecting a Page.',
+            ]);
+        }
+
+        Validator::make($settings->only(['app_id', 'app_secret', 'redirect_uri']), [
             'app_id' => ['required', 'string'],
             'app_secret' => ['required', 'string'],
             'redirect_uri' => ['required', 'url'],
-            'graph_version' => ['required', 'string'],
         ])->validate();
-    }
 
-    private function redirectUri(): string
-    {
-        return config('services.facebook.redirect_uri') ?: route('channels.facebook.callback');
+        return $settings;
     }
 
     private function graphUrl(string $path): string

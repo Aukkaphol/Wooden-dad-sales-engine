@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/integrations/facebook/pages/{connection}/test', [FacebookIntegrationController::class, 'testConnection'])->name('integrations.facebook.test');
     Route::post('/integrations/facebook/pages/{connection}/sync', [FacebookIntegrationController::class, 'sync'])->name('integrations.facebook.sync');
     Route::get('/channels/facebook', [FacebookIntegrationController::class, 'index'])->name('channels.facebook.index');
+    Route::post('/channels/facebook/settings', [FacebookIntegrationController::class, 'updateSettings'])->name('channels.facebook.settings');
     Route::get('/channels/facebook/connect', [FacebookIntegrationController::class, 'connect'])->name('channels.facebook.connect');
     Route::get('/channels/facebook/callback', [FacebookIntegrationController::class, 'callback'])->name('channels.facebook.callback');
     Route::post('/channels/facebook/{connection}/publish-test', [FacebookIntegrationController::class, 'publishTest'])->name('channels.facebook.publish-test');
