@@ -115,7 +115,8 @@ class MarketingStudioDashboardTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get(route('dashboard'))->assertForbidden();
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertRedirect(route('onboarding.workspace.create'));
     }
 
     private function fixture(): array

@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'timezone' => 'UTC',
             'locale' => 'en',
             'status' => 'active',
+            'system_role' => 'user',
             'remember_token' => Str::random(10),
         ];
     }

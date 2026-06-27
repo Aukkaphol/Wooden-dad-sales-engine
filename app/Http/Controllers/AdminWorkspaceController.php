@@ -145,16 +145,29 @@ class AdminWorkspaceController extends Controller
 
         $workspace = Workspace::query()->findOrFail($validated['workspace_id']);
 
-        WorkspaceUser::query()->create([
+        $membership = WorkspaceUser::withTrashed()->firstOrNew([
             'workspace_id' => $workspace->getKey(),
             'user_id' => $user->getKey(),
+        ]);
+
+        $membership->fill([
             'role' => $validated['role'],
             'invited_by' => $request->user()->getKey(),
-            'joined_at' => now(),
+            'joined_at' => $membership->joined_at ?? now(),
         ]);
+
+        if ($membership->trashed()) {
+            $membership->restore();
+        }
+
+        $membership->save();
 
         if ($validated['role'] === WorkspaceUser::ROLE_OWNER && $workspace->owner_id !== $user->getKey()) {
             $workspace->forceFill(['owner_id' => $user->getKey()])->save();
+        }
+
+        if ($user->current_workspace_id === null) {
+            $user->forceFill(['current_workspace_id' => $workspace->getKey()])->save();
         }
 
         return back()->with('status', 'User assigned to workspace.');
@@ -162,10 +175,9 @@ class AdminWorkspaceController extends Controller
 
     private function authorizeAdmin(User $user): void
     {
-        abort_unless($user->ownedWorkspaces()->exists() || $user->hasWorkspaceRole(
-            Workspace::query()->whereKey($user->current_workspace_id)->first() ?? new Workspace(),
-            WorkspaceUser::ROLE_OWNER,
-        ), 403);
+        abort_unless($user->isSystemAdmin() || $user->ownedWorkspaces()->exists() || $user->workspaceMemberships()
+            ->where('role', WorkspaceUser::ROLE_OWNER)
+            ->exists(), 403);
     }
 
     private function activeMembership(Workspace $workspace, User $user): WorkspaceUser

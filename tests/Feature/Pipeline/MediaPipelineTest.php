@@ -179,6 +179,13 @@ class MediaPipelineTest extends TestCase
     {
         [$user, $workspace] = $this->fixture();
         $outsider = User::factory()->create();
+        $outsiderWorkspace = Workspace::factory()->create(['owner_id' => $outsider->getKey()]);
+        WorkspaceUser::factory()->create([
+            'workspace_id' => $outsiderWorkspace->getKey(),
+            'user_id' => $outsider->getKey(),
+            'role' => WorkspaceUser::ROLE_OWNER,
+        ]);
+        $outsider->forceFill(['current_workspace_id' => $outsiderWorkspace->getKey()])->save();
 
         $this->actingAs($user)->get(route('workspaces.pipeline.index', $workspace))
             ->assertOk()

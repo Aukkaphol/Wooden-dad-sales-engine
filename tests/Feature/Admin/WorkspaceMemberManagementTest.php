@@ -30,6 +30,17 @@ class WorkspaceMemberManagementTest extends TestCase
             ->assertSee('View / Manage');
     }
 
+    public function test_super_admin_can_manage_all_workspaces_without_membership(): void
+    {
+        $superAdmin = User::factory()->create(['system_role' => 'super_admin']);
+        $workspace = Workspace::factory()->create(['name' => 'Future Company']);
+
+        $this->actingAs($superAdmin)
+            ->get(route('admin.workspaces.members', $workspace))
+            ->assertOk()
+            ->assertSee('Future Company');
+    }
+
     public function test_admin_can_add_user_to_workspace(): void
     {
         [$admin, $workspace] = $this->adminFixture();

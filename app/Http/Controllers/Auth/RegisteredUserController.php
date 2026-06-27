@@ -19,6 +19,6 @@ class RegisteredUserController extends Controller
     {
         $authService->register($request->validated(), $request);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('onboarding.workspace.create');
     }
 }

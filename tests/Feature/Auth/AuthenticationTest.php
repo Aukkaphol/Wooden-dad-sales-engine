@@ -24,7 +24,7 @@ class AuthenticationTest extends TestCase
             'password_confirmation' => 'Password123!',
         ]);
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect(route('onboarding.workspace.create'));
 
         $user = User::query()->where('email', 'admin@example.test')->firstOrFail();
 

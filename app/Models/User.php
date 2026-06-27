@@ -33,6 +33,7 @@ class User extends Authenticatable
         'last_login_at',
         'current_workspace_id',
         'status',
+        'system_role',
     ];
 
     /**
@@ -120,5 +121,15 @@ class User extends Authenticatable
         $membership = $this->membershipFor($workspace);
 
         return $membership !== null && in_array($membership->role, $roles, true);
+    }
+
+    public function isSystemAdmin(): bool
+    {
+        return $this->system_role === 'super_admin';
+    }
+
+    public function hasAnyWorkspace(): bool
+    {
+        return $this->workspaceMemberships()->exists();
     }
 }

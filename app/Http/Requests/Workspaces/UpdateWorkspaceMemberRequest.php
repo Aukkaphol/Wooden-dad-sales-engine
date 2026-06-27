@@ -16,13 +16,7 @@ class UpdateWorkspaceMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'role' => ['required', Rule::in([
-                WorkspaceUser::ROLE_ADMIN,
-                WorkspaceUser::ROLE_MEMBER,
-                WorkspaceUser::ROLE_MARKETING_MANAGER,
-                WorkspaceUser::ROLE_CONTENT_CREATOR,
-                WorkspaceUser::ROLE_REVIEWER,
-            ])],
+            'role' => ['required', Rule::in(WorkspaceUser::ADMIN_ASSIGNABLE_ROLES)],
         ];
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\GeneratedContentController;
 use App\Http\Controllers\MediaPipelineController;
 use App\Http\Controllers\PromptTemplateController;
 use App\Http\Controllers\PublishingQueueController;
+use App\Http\Controllers\WorkspaceOnboardingController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceMemberController;
 use Illuminate\Support\Facades\Route;
@@ -34,8 +35,12 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/onboarding/workspace', [WorkspaceOnboardingController::class, 'create'])->name('onboarding.workspace.create');
+    Route::post('/onboarding/workspace', [WorkspaceOnboardingController::class, 'store'])->name('onboarding.workspace.store');
+
+    Route::middleware('workspace.onboarded')->group(function (): void {
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/admin/workspaces', [AdminWorkspaceController::class, 'index'])->name('admin.workspaces.index');
     Route::get('/admin/workspaces/{workspace}/members', [AdminWorkspaceController::class, 'members'])->name('admin.workspaces.members');
     Route::post('/admin/workspaces/{workspace}/members', [AdminWorkspaceController::class, 'storeMember'])->name('admin.workspaces.members.store');
@@ -111,4 +116,5 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/workspaces/{workspace}/pipeline/{pipeline}/cancel', [MediaPipelineController::class, 'cancel'])->name('workspaces.pipeline.cancel');
     Route::patch('/workspaces/{workspace}/pipeline/{pipeline}/analytics', [MediaPipelineController::class, 'analytics'])->name('workspaces.pipeline.analytics');
     Route::get('/workspaces/{workspace}/director', AiDirectorController::class)->name('workspaces.director.show');
+    });
 });

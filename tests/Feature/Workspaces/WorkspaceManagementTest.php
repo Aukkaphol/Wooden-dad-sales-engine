@@ -21,7 +21,7 @@ class WorkspaceManagementTest extends TestCase
 
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post('/workspaces', [
+        $response = $this->actingAs($user)->post(route('onboarding.workspace.store'), [
             'name' => 'Wooden Dad Design',
             'industry' => 'Woodworking',
             'timezone' => 'Asia/Bangkok',
@@ -30,7 +30,7 @@ class WorkspaceManagementTest extends TestCase
 
         $workspace = Workspace::query()->where('name', 'Wooden Dad Design')->firstOrFail();
 
-        $response->assertRedirect(route('workspaces.show', $workspace));
+        $response->assertRedirect(route('dashboard'));
         $this->assertTrue(Str::isUuid($workspace->getKey()));
         $this->assertSame($workspace->getKey(), $user->refresh()->current_workspace_id);
         $this->assertDatabaseHas('workspace_users', [
@@ -75,7 +75,7 @@ class WorkspaceManagementTest extends TestCase
         WorkspaceUser::factory()->create([
             'workspace_id' => $workspace->getKey(),
             'user_id' => $member->getKey(),
-            'role' => WorkspaceUser::ROLE_MEMBER,
+            'role' => WorkspaceUser::ROLE_VIEWER,
         ]);
 
         $this->actingAs($member)->put(route('workspaces.update', $workspace), [
@@ -104,13 +104,13 @@ class WorkspaceManagementTest extends TestCase
 
         $this->actingAs($admin)->post(route('workspaces.members.store', $workspace), [
             'email' => 'member@example.test',
-            'role' => WorkspaceUser::ROLE_MEMBER,
+            'role' => WorkspaceUser::ROLE_VIEWER,
         ])->assertRedirect(route('workspaces.show', $workspace));
 
         $this->assertDatabaseHas('workspace_users', [
             'workspace_id' => $workspace->getKey(),
             'user_id' => $member->getKey(),
-            'role' => WorkspaceUser::ROLE_MEMBER,
+            'role' => WorkspaceUser::ROLE_VIEWER,
         ]);
 
         $this->actingAs($admin)->delete(route('workspaces.members.destroy', [$workspace, $owner]))

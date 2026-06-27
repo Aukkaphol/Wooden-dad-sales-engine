@@ -44,7 +44,7 @@
 
                             <a href="{{ route('dashboard') }}" class="transition hover:text-white">Dashboard</a>
                             <a href="{{ route('workspaces.index') }}" class="transition hover:text-white">Workspaces</a>
-                            @if (auth()->user()->ownedWorkspaces()->exists())
+                            @if (auth()->user()->isSystemAdmin() || auth()->user()->ownedWorkspaces()->exists())
                                 <a href="{{ route('admin.workspaces.index') }}" class="transition hover:text-white">Admin</a>
                             @endif
                             @if ($navWorkspace)
