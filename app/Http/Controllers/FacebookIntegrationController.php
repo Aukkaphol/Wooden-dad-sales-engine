@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FacebookConnection;
+use App\Models\FacebookIntegrationSetting;
 use App\Models\FacebookLog;
 use App\Models\User;
 use App\Models\Workspace;
@@ -11,6 +12,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class FacebookIntegrationController extends Controller
@@ -27,8 +29,41 @@ class FacebookIntegrationController extends Controller
 
         return view('integrations.facebook.index', [
             'workspace' => $workspace,
+            'settings' => FacebookIntegrationSetting::query()->where('workspace_id', $workspace->getKey())->first(),
             'connections' => $connections,
         ]);
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $workspace = $this->currentWorkspace($request->user());
+        $this->authorize('update', $workspace);
+
+        $existing = FacebookIntegrationSetting::query()
+            ->where('workspace_id', $workspace->getKey())
+            ->first();
+
+        $validated = $request->validate([
+            'app_id' => ['required', 'string', 'max:255'],
+            'app_secret' => [$existing ? 'nullable' : 'required', 'string', 'max:2000'],
+            'redirect_uri' => ['required', 'url', 'max:255'],
+        ]);
+
+        $attributes = [
+            'app_id' => $validated['app_id'],
+            'redirect_uri' => $validated['redirect_uri'],
+        ];
+
+        if (($validated['app_secret'] ?? null) !== null && $validated['app_secret'] !== '') {
+            $attributes['app_secret'] = $validated['app_secret'];
+        }
+
+        FacebookIntegrationSetting::query()->updateOrCreate(
+            ['workspace_id' => $workspace->getKey()],
+            $attributes,
+        );
+
+        return back()->with('status', 'Facebook App settings saved.');
     }
 
     public function connect(Request $request, FacebookConnectorService $facebook): RedirectResponse
@@ -40,7 +75,11 @@ class FacebookIntegrationController extends Controller
         $request->session()->put('facebook_oauth_state', $state);
         $request->session()->put('facebook_workspace_id', $workspace->getKey());
 
-        return redirect()->away($facebook->authorizationUrl($workspace, $state));
+        try {
+            return redirect()->away($facebook->authorizationUrl($workspace, $state));
+        } catch (ValidationException $exception) {
+            return back()->withErrors($exception->errors());
+        }
     }
 
     public function callback(Request $request, FacebookConnectorService $facebook): RedirectResponse
